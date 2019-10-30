@@ -1,7 +1,7 @@
 # TODO: add docstrings
 
 from enum import IntEnum
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 # TODO: relative imports
 from libbisca.card import Card
@@ -25,13 +25,14 @@ class State:
     def __init__(self, eldest: Player = Player.SOUTH):
         self.turn = eldest
         self.stock = Card.get_deck()
-        self.table = []
+        self.table: List[Tuple[Player, Card]] = []
 
-        self.hands = {player: [] for player in Player}
+        self.hands: Dict[Player, List[Card]] = {player: [] for player in Player}
         # self.piles seems unnecessary
 
         # can be reduced to a single number, but this is simpler
-        self.scores = {player: 0 for player in Player}
+        # TODO: don't like this typing, but...
+        self.scores: Dict[Union[Player, Winner], int] = {player: 0 for player in Player}
 
         # handling trumps
         self.stock = [
@@ -49,6 +50,13 @@ class State:
     def __repr__(self):
         # TODO: this is more a __str__ than a __repr__, check this
         # TODO: refactor -- turn, hands, winner and score need a better representation, and really needs better look
+        try:
+            score = self.score
+            winner = self.winner
+        except ValueError:
+            score = None
+            winner = None
+
         return (
             f"State("
             f"\n\tturn = {self.turn}, "
@@ -58,27 +66,26 @@ class State:
             f"\n\tscores = {self.scores}, "
             f"\n\ttable = {self.table}"
             f"\n\tis_endgame = {self.is_endgame()}"
-            f"\n\twinner = {self.winner}"
-            f"\n\tscore == {self.score}"
+            f"\n\twinner = {winner}"
+            f"\n\tscore == {score}"
             f"\n)"
         )
 
     @property
     def score(self) -> Optional[int]:
+        # TODO: figure out mypy's issue with Optional[int] -- just use ValueError (check tests)
         if self.is_endgame():
             assert sum(self.scores.values()) == 120
 
             if self.winner == Winner.DRAW:
                 return 60
             else:
-                return self.scores[self.winner]
+                return self.scores[self.winner]  # TODO: check mypy complaint here
         else:
-            return None
+            return None  # raise ValueError("game not yet finished")  # TODO: improve
 
     @property
     def winner(self) -> Optional[Winner]:
-        # TODO: or just raise ValueError if it's called before is_terminal is True
-
         if self.is_endgame():
             if self.scores[Player.NORTH] == self.scores[Player.SOUTH]:
                 return Winner.DRAW
@@ -89,9 +96,10 @@ class State:
                     else Winner.SOUTH
                 )
         else:
-            return (
-                None
-            )  # raise ValueError("game not yet finished") -- improve exception type and msg
+            # or just raise ValueError if it's called before is_terminal is True
+            # TODO: improve exception type and msg
+            # raise ValueError("game not yet finished")
+            return None  # TODO: hmmm
 
     # TODO: add save/load? to json?
 
@@ -110,7 +118,7 @@ class State:
         self.table.append((self.turn, move))
 
         if eldest:
-            self.turn = -self.turn
+            self.turn = Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH
         else:
             # youngest
             winner = self._get_round_winner()
@@ -129,7 +137,11 @@ class State:
         return None
 
     def _deal_cards(self) -> None:
-        for turn in (self.turn, -self.turn):
+        # TODO: add _get_opponent?
+        for turn in (
+            self.turn,
+            Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH,
+        ):
             self.hands[turn].append(self.stock.pop())
 
     def _get_round_winner(self) -> Player:

@@ -30,7 +30,7 @@ class Game:
             for _ in range(State.NUM_PLAYERS):
                 self._run_round()
 
-        return self.state.winner, self.state.score
+        return self.state.winner, self.state.score  # TODO: check mypy complaint here
 
     @staticmethod
     def run_multiple(agents: List[Agent], num_times=10) -> Dict[Winner, int]:
