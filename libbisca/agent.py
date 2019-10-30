@@ -9,7 +9,6 @@ from libbisca.state import State
 
 
 class Agent(ABC):
-
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
@@ -20,6 +19,5 @@ class Agent(ABC):
 
 
 class RandomAgent(Agent):
-
     def get_move(self, state: State) -> Card:
-        return random.choice(state.hands[state.turn])   # TODO: add state.hand to State?
+        return random.choice(state.hands[state.turn])  # TODO: add state.hand to State?

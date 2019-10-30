@@ -10,7 +10,6 @@ from libbisca.state import State, Player, Winner
 
 
 class Game:
-
     def __init__(self, agents: List[Agent], eldest: Player = Player.SOUTH):
         self.agents = agents
         self.state = State(eldest=eldest)
@@ -37,7 +36,7 @@ class Game:
     def run_multiple(agents: List[Agent], num_times=10) -> Dict[Winner, int]:
         results = {winner: 0 for winner in Winner}
 
-        for _ in range(num_times // 2):     # TODO: this bit needs to be well documented
+        for _ in range(num_times // 2):  # TODO: this bit needs to be well documented
             for eldest in Player:
                 game = Game(agents, eldest)
                 winner, _ = game.run()

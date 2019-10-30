@@ -83,9 +83,15 @@ class State:
             if self.scores[Player.NORTH] == self.scores[Player.SOUTH]:
                 return Winner.DRAW
             else:
-                return Winner.NORTH if self.scores[Player.NORTH] > self.scores[Player.SOUTH] else Winner.SOUTH
+                return (
+                    Winner.NORTH
+                    if self.scores[Player.NORTH] > self.scores[Player.SOUTH]
+                    else Winner.SOUTH
+                )
         else:
-            return None     # raise ValueError("game not yet finished") -- improve exception type and msg
+            return (
+                None
+            )  # raise ValueError("game not yet finished") -- improve exception type and msg
 
     # TODO: add save/load? to json?
 
