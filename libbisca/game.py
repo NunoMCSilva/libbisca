@@ -4,9 +4,9 @@ import copy
 import random
 from typing import Dict, List, Optional, Tuple
 
-from bisca.agent import Agent
-from bisca.card import Card
-from bisca.state import State, Player, Winner
+from libbisca.agent import Agent
+from libbisca.card import Card
+from libbisca.state import State, Player, Winner
 
 
 class Game:

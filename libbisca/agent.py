@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 import random
 
 # TODO: relative imports not working, so...
-from bisca.card import Card
-from bisca.state import State
+from libbisca.card import Card
+from libbisca.state import State
 
 
 class Agent(ABC):

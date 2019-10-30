@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import Optional, Tuple
 
 # TODO: relative imports
-from bisca.card import Card
+from libbisca.card import Card
 
 
 class Player(IntEnum):

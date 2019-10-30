@@ -2,8 +2,8 @@
 
 # TODO: add docstrings
 
-from bisca.card import Card, Rank, Suit
-from bisca.state import State, Player, Winner
+from libbisca.card import Card, Rank, Suit
+from libbisca.state import State, Player, Winner
 
 
 def test__state_init__first_eldest_is_south_player__initializes_correctly(mocker):

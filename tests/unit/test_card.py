@@ -2,7 +2,7 @@
 
 import pytest
 
-from bisca.card import Card, Rank, Suit, TrumpCard
+from libbisca.card import Card, Rank, Suit, TrumpCard
 
 
 # TODO: check black's change to this comments formatting... don't really like it
@@ -17,8 +17,8 @@ from bisca.card import Card, Rank, Suit, TrumpCard
         # 5C < 7C
         (Card(Rank.FIVE, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), False),
         (TrumpCard(Rank.FIVE, Suit.CLUBS), TrumpCard(Rank.SEVEN, Suit.CLUBS), False),
-        # same type, different suits: compare rank -- in this bisca variant
-        # TODO: check about other bisca variants (at least one mandates follow after stock is empty)
+        # same type, different suits: compare rank -- in this libbisca variant
+        # TODO: check about other libbisca variants (at least one mandates follow after stock is empty)
         # AC > 7H
         (Card(Rank.ACE, Suit.CLUBS), Card(Rank.SEVEN, Suit.HEARTS), True),
         (TrumpCard(Rank.ACE, Suit.CLUBS), TrumpCard(Rank.SEVEN, Suit.HEARTS), True),
