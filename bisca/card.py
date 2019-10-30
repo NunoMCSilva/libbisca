@@ -33,7 +33,7 @@ class Rank(Enum):
 
     @property
     def score(self) -> int:
-        return RANK_SCORE.get(self.rank.value, 0)
+        return RANK_SCORE.get(self.value, 0)
 
 
 class Suit(Enum):
