@@ -44,6 +44,25 @@ class State:
         for _ in range(self.HAND_SIZE):
             self._deal_cards()
 
+    # TODO: def __hash__(self): necessary?
+
+    def __repr__(self):
+        # TODO: this is more a __str__ than a __repr__, check this
+        # TODO: refactor -- turn, hands, winner and score need a better representation, and really needs better look
+        return (
+            f"State("
+            f"\n\tturn = {self.turn}, "
+            f"\n\tstock = {self.stock}, "
+            f"\n\ttrump = {self.trump}, "
+            f"\n\thands = {self.hands}, "
+            f"\n\tscores = {self.scores}, "
+            f"\n\ttable = {self.table}"
+            f"\n\tis_endgame = {self.is_endgame()}"
+            f"\n\twinner = {self.winner}"
+            f"\n\tscore == {self.score}"
+            f"\n)"
+        )
+
     @property
     def score(self) -> Optional[int]:
         if self.is_endgame():
@@ -68,10 +87,10 @@ class State:
         else:
             return None     # raise ValueError("game not yet finished") -- improve exception type and msg
 
-    # TODO: add save/load?
+    # TODO: add save/load? to json?
 
     def is_endgame(self) -> bool:
-        return not (bool(self.stock) and bool(self.hands[Player.NORTH]) and bool(self.hands[Player.SOUTH]))
+        return len(self.stock) + sum(len(hand) for hand in self.hands.values()) == 0
 
     def play(self, move: Card) -> Optional[Tuple[Player, int]]:
         # TODO: recheck game rules (sp. that bit about follow after empty stock -- will need to modify __gt__ for that)
@@ -110,50 +129,3 @@ class State:
     def _get_round_winner(self) -> Player:
         (player1, card1), (player2, card2) = self.table
         return player1 if card1 > card2 else player2
-
-
-
-"""
-
-
-
-
-
-
-    def __repr__(self):
-        # TODO: refactor -- turn, hands, winner and score need a better representation
-        return (
-            f"State("
-            f"\n\tturn = {self.turn}, "
-            f"\n\tstock = {self.stock}, "
-            f"\n\ttrump = {self.trump}, "
-            f"\n\thands = {self.hands}, "
-            f"\n\tscores = {self.scores}, "
-            f"\n\ttable = {self.table}"
-            f"\n\tis_endgame = {self.is_endgame()}"
-            f"\n\twinner = {self.winner}"
-            f"\n\tscore == {self.score}"
-            f"\n)"
-        )
-
-    # TODO: remove _is_endgame, _winner, etc. (or make it work--check that) -- is not working as well as I want and it is redundant
-
-
-    # TODO: add save/load? -- to json
-
-
-
-
-
-
-""
-class State:
-    __init__(eldest=0)
-    __repr__()
-    is_endgame()
-    play(move)
-    winner()
-""
-
-
-"""
