@@ -1,4 +1,4 @@
-Bisca
+libbisca
 -----
 
 Current status: Alpha
