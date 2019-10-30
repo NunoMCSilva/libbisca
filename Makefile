@@ -11,3 +11,6 @@ black:
 
 cov:
 	$(PER) pytest --cov=bisca tests/unit/
+
+mypy:
+	$(PER) pytest --mypy -m mypy tests/unit/test_*.py
