@@ -68,6 +68,8 @@ class State:
         else:
             return None     # raise ValueError("game not yet finished") -- improve exception type and msg
 
+    # TODO: add save/load?
+
     def is_endgame(self) -> bool:
         return not (bool(self.stock) and bool(self.hands[Player.NORTH]) and bool(self.hands[Player.SOUTH]))
 
