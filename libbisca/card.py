@@ -63,6 +63,20 @@ class Card:
         return self.rank.score
 
     @staticmethod
+    def get_card(card_str: str) -> "Card":
+        # TODO: needs refactoring
+        # this is mostly for testing -- can use _DECK
+        rank, suit = card_str
+        rank = {
+            "A": Rank.ACE, "2": Rank.TWO, "3": Rank.THREE, "4": Rank.FOUR, "5": Rank.FIVE, "6": Rank.SIX,
+            "7": Rank.SEVEN, "Q": Rank.QUEEN, "J": Rank.JACK, "K": Rank.KING
+        }[rank]
+        suit = {
+            "H": Suit.HEARTS, "D": Suit.DIAMONDS, "S": Suit.SPADES, "C": Suit.CLUBS
+        }[suit]
+        return Card(rank, suit)
+
+    @staticmethod
     def is_trump() -> bool:
         return False
 

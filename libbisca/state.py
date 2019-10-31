@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import Dict, List, Optional, Tuple, Union
 
 # TODO: relative imports
-from libbisca.card import Card
+from libbisca.card import Card, Deck
 
 
 class Player(IntEnum):
@@ -24,107 +24,66 @@ class State:
 
     def __init__(self, eldest: Player = Player.SOUTH):
         self.turn = eldest
-        self.stock = Card.get_deck()
-        self.table: List[Tuple[Player, Card]] = []
 
-        self.hands: Dict[Player, List[Card]] = {player: [] for player in Player}
-        # self.piles seems unnecessary
-
-        # can be reduced to a single number, but this is simpler
-        # TODO: don't like this typing, but...
-        self.scores: Dict[Union[Player, Winner], int] = {player: 0 for player in Player}
-
-        # handling trumps
-        self.stock = [
-            (card.get_trumped() if card.suit == self.stock[0].suit else card)
-            for card in self.stock
-        ]
-        self.trump = self.stock[0]
+        self.stock = Deck()
+        self.trump = self.stock.bottom
+        self.hands = {player: [] for player in Player}
+        self.table = list()
+        self.score = 0      # POV of Player.South -- TODO: may get confusing (Player.SOUTH == -1)
 
         # deal initial hand
         for _ in range(self.HAND_SIZE):
             self._deal_cards()
 
-    # TODO: def __hash__(self): necessary?
+        # TODO: size of Deck -- add CONST? len(self.stock.deck)?
+        self._cards_in_stock_and_hands = 40    # cards in stock and hands
 
-    def __repr__(self):
-        # TODO: this is more a __str__ than a __repr__, check this
-        # TODO: refactor -- turn, hands, winner and score need a better representation, and really needs better look
-        try:
-            score = self.score
-            winner = self.winner
-        except ValueError:
-            score = None
-            winner = None
+    # TODO: is __hash__(self): necessary?
 
-        return (
-            f"State("
-            f"\n\tturn = {self.turn}, "
-            f"\n\tstock = {self.stock}, "
-            f"\n\ttrump = {self.trump}, "
-            f"\n\thands = {self.hands}, "
-            f"\n\tscores = {self.scores}, "
-            f"\n\ttable = {self.table}"
-            f"\n\tis_endgame = {self.is_endgame()}"
-            f"\n\twinner = {winner}"
-            f"\n\tscore == {score}"
-            f"\n)"
-        )
+    def __str__(self):
+        # TODO: improve this (pretty print?)
+        return f"State(turn={self.turn}, stock={self.stock}, trump={self.trump}, hands={self.hands}, " \
+               f"score={self.score}, self.table={self.table}, is_endgame={self.is_endgame()}, winner={self.winner}"
+
+    # TODO: add save/load? to json?
 
     @property
-    def score(self) -> Optional[int]:
-        # TODO: figure out mypy's issue with Optional[int] -- just use ValueError (check tests)
-        if self.is_endgame():
-            assert sum(self.scores.values()) == 120
-
-            if self.winner == Winner.DRAW:
-                return 60
-            else:
-                return self.scores[self.winner]  # TODO: check mypy complaint here
-        else:
-            return None  # raise ValueError("game not yet finished")  # TODO: improve
+    def opponent(self) -> Player:
+        return Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH
 
     @property
     def winner(self) -> Optional[Winner]:
         if self.is_endgame():
-            if self.scores[Player.NORTH] == self.scores[Player.SOUTH]:
+            if self.score == 0:
                 return Winner.DRAW
             else:
-                return (
-                    Winner.NORTH
-                    if self.scores[Player.NORTH] > self.scores[Player.SOUTH]
-                    else Winner.SOUTH
-                )
+                return Winner.SOUTH if self.score > 0 else Winner.NORTH
         else:
-            # or just raise ValueError if it's called before is_terminal is True
-            # TODO: improve exception type and msg
-            # raise ValueError("game not yet finished")
-            return None  # TODO: hmmm
-
-    # TODO: add save/load? to json?
+            return None
 
     def is_endgame(self) -> bool:
-        return len(self.stock) + sum(len(hand) for hand in self.hands.values()) == 0
+        return self._cards_in_stock_and_hands == 0
 
     def play(self, move: Card) -> Optional[Tuple[Player, int]]:
-        # TODO: recheck game rules (sp. that bit about follow after empty stock -- will need to modify __gt__ for that)
-
-        eldest = self.table == []
+        # TODO: recheck game rules (sp. that bit about follow after empty stock -- don't modify __gt__ just hav other pl
+        # TODO: two variants, 1 this, 2 follow after self.stock == 0
 
         # TODO: better exception here would be IllegalMove?
         self.hands[self.turn].remove(move)
+        self._cards_in_stock_and_hands -= 1
 
-        # TODO: better format other than (player, card)
+        # TODO: better format other than (player, card)?
         self.table.append((self.turn, move))
 
-        if eldest:
-            self.turn = Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH
+        if len(self.table) == 1:
+            # eldest
+            self.turn = self.opponent
         else:
             # youngest
             winner = self._get_round_winner()
-            added_score = sum(card.score for _, card in self.table)
+            added_score = sum(card.score for _, card in self.table) * winner.value
 
-            self.scores[winner] += added_score
+            self.score += added_score
             self.turn = winner
             self.table = []
 
@@ -137,11 +96,7 @@ class State:
         return None
 
     def _deal_cards(self) -> None:
-        # TODO: add _get_opponent?
-        for turn in (
-            self.turn,
-            Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH,
-        ):
+        for turn in (self.turn, self.opponent):
             self.hands[turn].append(self.stock.pop())
 
     def _get_round_winner(self) -> Player:
