@@ -6,6 +6,7 @@ cache: pip
 
 # command to install dependencies
 install:
+  - pip install coverage
   - pipenv lock -r --dev > requirements.txt
   - pip install -r requirements.txt
 
@@ -13,5 +14,5 @@ install:
 script:
   - pytest --cov=libbisca
 
-after_script:
+after_success:
   codecov
