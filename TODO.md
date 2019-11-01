@@ -25,3 +25,6 @@ score, simpler
 - state.NUM_PLAYERS -- think about it 
 - state.HAND_SIZE -- think about it
 - state.opponent -- handle properties in documentation
+- setup.py - Framework :: Hypothesis
+- check flit (and pyproject.toml), etc. later -- for now just use twine
+- check where to put .pypirc
