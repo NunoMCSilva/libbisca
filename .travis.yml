@@ -11,4 +11,7 @@ install:
 
 # command to run tests
 script:
-  - pytest
+  - pytest --cov=libbisca
+
+after_script:
+  codecov
