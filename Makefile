@@ -10,4 +10,4 @@ black:
 unittest:
 	$(PER) pytest tests/unit
 
-test: unittest
+test: black unittest
