@@ -1,4 +1,5 @@
 # TODO: add docstrings
+# TODO: decide which methods/etc are better as _"private"
 
 from dataclasses import dataclass
 from enum import Enum
@@ -39,6 +40,8 @@ class Suit(Enum):
     SPADES = "♠"
     CLUBS = "♣"
 
+    # TODO: add Trump Suit here as method?
+
 
 # Card =================================================================================================================
 @dataclass
@@ -54,7 +57,7 @@ class Card:
         return False if other.is_trump() else self.rank > other.rank
 
     def __repr__(self):
-        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this
+        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this comment
         # "Although practicality beats purity." -- The Zen of Python
         return f"{self.rank.value}{self.suit.value}"
 
@@ -65,14 +68,25 @@ class Card:
     @staticmethod
     def get_card(card_str: str) -> "Card":
         # TODO: needs refactoring
-        # this is mostly for testing -- can use _DECK
+        # this is mostly for testing -- can use _DECK later (remember to save memory and maybe be faster)
         rank, suit = card_str
         rank = {
-            "A": Rank.ACE, "2": Rank.TWO, "3": Rank.THREE, "4": Rank.FOUR, "5": Rank.FIVE, "6": Rank.SIX,
-            "7": Rank.SEVEN, "Q": Rank.QUEEN, "J": Rank.JACK, "K": Rank.KING
+            "A": Rank.ACE,
+            "2": Rank.TWO,
+            "3": Rank.THREE,
+            "4": Rank.FOUR,
+            "5": Rank.FIVE,
+            "6": Rank.SIX,
+            "7": Rank.SEVEN,
+            "Q": Rank.QUEEN,
+            "J": Rank.JACK,
+            "K": Rank.KING,
         }[rank]
         suit = {
-            "H": Suit.HEARTS, "D": Suit.DIAMONDS, "S": Suit.SPADES, "C": Suit.CLUBS
+            "H": Suit.HEARTS,
+            "D": Suit.DIAMONDS,
+            "S": Suit.SPADES,
+            "C": Suit.CLUBS,
         }[suit]
         return Card(rank, suit)
 
@@ -83,7 +97,7 @@ class Card:
 
 # TrumpCard ============================================================================================================
 class TrumpCard(Card):
-    # TODO: this might be better implemented in something TrumpSuit or...
+    # TODO: this might be better implemented in something TrumpSuit or...?
     TRUMP_SUIT_STR = {
         Suit.HEARTS: "♡",
         Suit.DIAMONDS: "♢",
@@ -106,7 +120,6 @@ class TrumpCard(Card):
 
 # Deck =================================================================================================================
 class Deck:
-
     def __init__(self, shuffle=True):
         # TODO: replace by module level _DECK (memory saves) and do copy or something? [or change __deepcopy__ in Card?]
         deck = [Card(rank, suit) for suit in Suit for rank in Rank]
@@ -116,7 +129,10 @@ class Deck:
             SystemRandom().shuffle(deck)
 
         # set trumps
-        self.deck = [(TrumpCard(card.rank, card.suit) if card.suit == deck[0].suit else card) for card in deck]
+        self.deck = [
+            (TrumpCard(card.rank, card.suit) if card.suit == deck[0].suit else card)
+            for card in deck
+        ]
 
     def __str__(self):
         return str(self.deck)
