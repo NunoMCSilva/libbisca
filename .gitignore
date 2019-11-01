@@ -128,3 +128,10 @@ dmypy.json
 
 # PyCharm project settings
 .idea/
+
+# TODO: remove from .gitignore
+/Makefile.old
+/mypy.ini
+/notes.txt
+_setup.py
+do_profile.py
