@@ -13,6 +13,8 @@ class Game:
         self.agents = agents
         self.state = State(eldest)
 
+    # TODO: add load/save to json?
+
     def run(self) -> State:
         # This might belong in State, but I prefer to keep it here so state doesn't have to deal with agents
         while not self.state.is_endgame():
