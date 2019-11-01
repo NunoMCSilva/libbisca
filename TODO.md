@@ -5,7 +5,7 @@ TODO
 - state.score and state.get_score is too complex 
 (code-wise), fix that
 - add logging
-- check what the issue is relative imports (PyCharm?)
+- check what the issue is with relative imports (PyCharm?)
 - need to add lots of tests for agents, dev, game
 
 # Maybe TODO
@@ -13,3 +13,4 @@ TODO
 - agent.py: add Agent.name (class nickname, useful 
 to show in gui -- just do it in gui)?
 - agent.py: add state.hand to State?
+- is pytest-benchmarks all that useful here?
