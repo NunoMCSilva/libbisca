@@ -3,7 +3,6 @@
 from enum import IntEnum
 from typing import Optional, Tuple
 
-# TODO: relative imports
 from libbisca.card import Card, Deck
 
 
@@ -57,6 +56,8 @@ class State:
         )
 
     # TODO: add save/load to json?
+
+    # TODO: add state.hand to State? (current hand property)
 
     @property
     def opponent(self) -> Player:
