@@ -8,12 +8,17 @@ from libbisca.state import State, Player, Winner
 
 
 class Game:
+    # TODO: make clear Game is to run State (mostly for dev, since State will have a do_rollout)
+    # TODO: might be a good idea to separate this into Runner in dev, and keep this one as a undo/history (saves full history, allows load)
 
     def __init__(self, agents: Sequence[Agent], eldest: Player = Player.SOUTH):
         self.agents = agents
         self.state = State(eldest)
 
     # TODO: add load/save to json?
+    # TODO: add undo? or not necessary in non-gui
+    # TODO: keep "log" to save?
+    # TODO: add history (necessary for undo?)?
 
     def run(self) -> State:
         # This might belong in State, but I prefer to keep it here so state doesn't have to deal with agents
