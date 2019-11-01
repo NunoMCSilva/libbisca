@@ -1,6 +1,8 @@
-libbisca
+libbisca - Bisca card game library
 -----
 
-Current status: Alpha
+Current status: Pre-Alpha
+In one word: not ready for use.
 
-Bisca (card game) library.
+
+

@@ -8,7 +8,6 @@ from libbisca.card import Card
 
 
 class Agent(ABC):
-
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
@@ -18,6 +17,5 @@ class Agent(ABC):
 
 
 class RandomAgent(Agent):
-
     def get_move(self, state: ObservedState) -> Card:
         return random.choice(state.hand)

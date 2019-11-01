@@ -14,12 +14,8 @@ black:
 
 
 
-
-
 integration:
 	$(PER) pytest --benchmark-skip tests/integration/
-
-
 
 mypy:
 	$(PER) pytest --mypy -m mypy tests/unit/test_*.py
@@ -30,3 +26,6 @@ profile:
 benchmark:
 	#$(PER) pytest --benchmark-only --benchmark-histogram tests/integration/
 	$(PER) pytest --benchmark-only --benchmark-compare tests/integration/
+
+publish:
+	echo	# flit publish

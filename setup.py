@@ -1,15 +1,27 @@
-# TODO #!/usr/bin/env python
+import pathlib
+from setuptools import setup, find_packages
 
-from distutils.core import setup
+HERE = pathlib.Path(__file__).parent
+
+README = (HERE / "README.md").read_text()
 
 setup(
     name="libbisca",
     version="0.0.1",
-    # TODO: description='',
-    # TODO: long_description=
+    description="Bisca card game library",
+    long_description=README,
+    long_description_content_type="text/markdown",
+    # TODO: url="https://github.com/",
     author="Nuno Miguel Casteloa da Silva",
-    # TODO: author_email='gward@python.net',
-    # TODO: url='https://www.python.org/sigs/distutils-sig/',
-    packages=["libbisca"],  # TODO: , tests?
-    # TODO: classifiers, platforms, keywords, license
+    author_email="NunoMCSilva@gmail.com",
+    # TODO: license="",
+    classifiers=[
+        # TODO: add classifiers
+    ],
+    packages=find_packages(exclude=("tests",)),     # TODO: not sure about this...
+    # include_package_data=True,
+    # TODO: what about tests?
+    # install_requires=[],   # TODO: install_requires? check this...
+    # TODO: doesn't have entry_points?
 )
+# TODO: add keywords, platform?

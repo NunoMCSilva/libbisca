@@ -22,7 +22,7 @@ class State:
     NUM_PLAYERS = 2  # code will only handle 2 player for now (and maybe in the future)
     HAND_SIZE = 3  # TODO: extend code to Bisca9 later
 
-    def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = Player.SOUTH):
+    def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = HAND_SIZE):
         self.turn = eldest
 
         self.stock = Deck()

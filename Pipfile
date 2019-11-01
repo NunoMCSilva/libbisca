@@ -12,6 +12,8 @@ pytest-mypy = ">=0.4.1"
 pytest-cov = ">=2.8.1"
 pytest-benchmark = {extras = ["histogram"],version = "*"}
 hypothesis = ">=4.42.3"
+twine = "*"
+flit = ">=1.3"
 
 [packages]
 

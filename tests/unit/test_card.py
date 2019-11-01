@@ -1,5 +1,3 @@
-# TODO: add docstrings
-
 import pytest
 
 from libbisca.card import *

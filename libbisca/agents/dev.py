@@ -8,7 +8,6 @@ from libbisca.state import State, Player, Winner
 
 
 class ObservedState:
-
     def __init__(self, state: State, observer: Player):
         raise NotImplementedError
 
@@ -28,7 +27,6 @@ class PossibleCards:
 
 
 class Runner:
-
     def __init__(self, agents: Sequence[Agent], eldest: Player = Player.SOUTH):
         self.agents = agents
         self.state = State(eldest)
@@ -61,4 +59,30 @@ def main():
     game = Game([agent, agent])
     print(game)
     state = game.run()
+"""
+
+"""
+    def __iter__(self):
+        return game
+
+    def __next__(self):
+        # TODO: other method would have one call to endgame (track cards to make endgame faster)
+        if self.state.is_endgame():
+            raise StopIteration
+        else:
+            return self._run_round()
+
+    def _run_round(self) -> State:
+
+        state_copy = copy.deepcopy(self.state)
+        move = self.agents[self.state.turn].get_move(state_copy)
+
+        self.state.play(move)  # TODO: handling of IllegalMove?
+        return self.state
+
+        while not self.state.is_endgame():
+            for _ in range(State.NUM_PLAYERS):
+                self._run_round()
+
+        return self.state.winner, self.state.score  # TODO: check mypy complaint here
 """

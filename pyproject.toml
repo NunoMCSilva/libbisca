@@ -4,6 +4,7 @@ build-backend = "flit.buildapi"
 
 [tool.flit.metadata]
 module = "libbisca"
+description-file = "README.md"
 author = "Nuno Miguel Casteloa da Silva"
 author-email = "NunoMCSilva@gmail.com"
 home-page = "https://github.com/NunoMCSilva/libbisca"
