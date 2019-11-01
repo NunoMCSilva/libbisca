@@ -19,6 +19,11 @@ class ObservedState:
 
 class PossibleCards:
     # represents a range of cards -- useful for search
+
+    # pc = PossibleCards(state.stock, state.hands[opponent])
+    # self.stock = pc
+    # self.opp_hand = pc
+
     raise NotImplementedError
 
 
@@ -47,3 +52,13 @@ class Runner:
                 results[state.winner] += 1
 
         return results
+
+
+"""
+def main():
+    from libbisca.agent import RandomAgent
+    agent = RandomAgent()
+    game = Game([agent, agent])
+    print(game)
+    state = game.run()
+"""
