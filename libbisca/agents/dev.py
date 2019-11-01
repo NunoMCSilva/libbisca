@@ -3,7 +3,8 @@
 
 from typing import Dict, Optional, Sequence, Tuple
 
-from libbisca.agents.agents import Agent
+# from libbisca.agents.agents import Agent - TODO: handle this typing issue later
+from libbisca.card import Card
 from libbisca.state import State, Player, Winner
 
 
@@ -23,11 +24,14 @@ class PossibleCards:
     # self.stock = pc
     # self.opp_hand = pc
 
-    raise NotImplementedError
+    def __init__(self, cards: Card):
+        raise NotImplementedError
 
 
 class Runner:
-    def __init__(self, agents: Sequence[Agent], eldest: Player = Player.SOUTH):
+    def __init__(
+        self, agents, eldest: Player = Player.SOUTH
+    ):  # Sequence[Agent] - TODO: handle this typing issue later
         self.agents = agents
         self.state = State(eldest)
 
@@ -41,7 +45,9 @@ class Runner:
         return self.state
 
     @staticmethod
-    def run_multiple(agents: Sequence[Agent], num_games=10) -> Dict[Winner, int]:
+    def run_multiple(
+        agents: Sequence, num_games=10
+    ) -> Dict[Winner, int]:  # Sequence[Agent]
         results = {winner: 0 for winner in Winner}
 
         for _ in range(num_games // 2):  # TODO: this bit needs to be well documented
