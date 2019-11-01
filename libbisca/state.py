@@ -1,4 +1,12 @@
-# TODO: add docstrings
+"""Bisca State
+
+Implements the rules for a single variant.
+
+Exports the following classes:
+    * Player - enum representing the two players (North and South)
+    * Winner - enum representing the win conditions (North win, South win and Draw)
+    * State - a snapshot of the current game state
+"""
 
 from enum import IntEnum
 from typing import Optional, Tuple
@@ -7,22 +15,67 @@ from libbisca.card import Card, Deck
 
 
 class Player(IntEnum):
-    # choice due to SOUTH being the player side in a future GUI (not in libbisca)
     NORTH = -1
-    SOUTH = 1
+    SOUTH = 1  # player side on future GUI
 
 
 class Winner(IntEnum):
-    SOUTH = 1
+    SOUTH = Player.SOUTH
     DRAW = 0
-    NORTH = -1
+    NORTH = Player.NORTH
 
 
 class State:
+    """
+    Represents a game state (snapshot)
+
+    Attributes
+    ----------
+    NUM_PLAYERS : int
+        num of players
+    HAND_SIZE : int
+        num of cards in hand
+    turn : Player
+        game turn
+    stock : List[Card]
+        un-dealt stock of cards
+    trump : Card
+        game trump
+    hands : Dict[Player, Card]
+        player cards in hands
+    table : List[Card]
+        cards on the table
+    score : int
+        score from the pov of the South player: (South score - North score)
+
+    Methods
+    -------
+    do_rollout()
+        continue game with random moves until endgame (useful for Monte Carlo agents)
+    get_score(player)
+        return score of given player
+    is_endgame()
+        return True if this is a endgame/terminal state, False otherwise
+    play(move)
+        modify state by playing the given card
+    opponent
+        return player currently not in turn
+    winner
+        return winner of game on endgame state, None otherwise
+    """
+
     NUM_PLAYERS = 2  # code will only handle 2 player for now (and maybe in the future)
     HAND_SIZE = 3  # TODO: extend code to Bisca9 later
 
     def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = HAND_SIZE):
+        """
+        Parameters
+        ----------
+        eldest : Player
+            first player to move
+        hand_size : int
+            player hand size (3, 7 ou 9)
+        """
         self.turn = eldest
 
         self.stock = Deck()
