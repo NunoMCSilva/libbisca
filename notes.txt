@@ -1,0 +1,440 @@
+import pathlib
+from setuptools import setup, find_packages
+
+HERE = pathlib.Path(__file__).parent
+
+README = (HERE / "README.md").read_text()
+
+setup(
+    version="0.0.1",
+    description="Bisca card game library",
+
+    long_description_content_type="text/markdown",
+
+
+    classifiers=[
+        # TODO: add classifiers
+    ],
+    packages=find_packages(exclude=("tests",)),     # TODO: not sure about this...
+    # include_package_data=True,
+    # TODO: what about tests?
+    # install_requires=[],   # TODO: install_requires? check this...
+    # TODO: doesn't have entry_points?
+)
+# TODO: add keywords, platform?
+
+
+
+
+
+
+pyproject.toml:
+requires = [
+    "requests >=2.6",
+    "configparser; python_version == '2.7'",
+]
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest >=2.7.3",
+    "pytest-cov",
+]
+doc = ["sphinx"]
+
+[tool.flit.metadata.urls]
+Documentation = "https://flit.readthedocs.io/en/latest/"
+
+
+classifiers
+    A list of Trove classifiers.
+requires-python
+    A version specifier for the versions of Python this requires, e.g. ~=3.3 or >=3.3,<4 which are equivalents.
+dist-name
+    If you want your package’s name on PyPI to be different from the importable module name, set this to the PyPI name.
+keywords
+    Space separated list of words to help with searching for your package.
+license
+    The name of a license, if you’re using one for which there isn’t a Trove classifier. It’s recommended to use Trove classifiers instead of this in most cases.
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+import copy
+import random
+
+# TODO: hmmm, should game be collapsed into State?
+
+    def __repr__(self):
+        # TODO: really need some pprint here? and maybe modify State.__repr__
+        # return f"Game(agents = {self.agents}, state = {self.state})"
+        return "game"
+
+if __name__ == "__main__":
+    from libbisca import RandomAgent
+
+    agent = RandomAgent()
+    print(agent)
+    game = Game([agent, agent])
+    # print(game)
+    # print(game.run())
+    print(Game.run_multiple([agent, agent], 1000))
+"""
+
+
+
+
+
+
+
+
+### how to check in cov, which statements are not covered -- might be nice to have a pycharm coloring plugin
+
+
+
+
+
+
+
+
+
+# ---------------------------------------
+using hypothesis... hmmm, maybe generating diff decks to tests state with? -- integration (read more about integration)
+
+
+
+# ---------------------------------------
+non-gui, just the library
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+        #self._is_endgame = False
+        #self._winner = None
+
+
+cov:
+	$(PER) pytest --cov=bisca tests/unit/
+testcoverage...
+        # TODO: naming - score of scores?
+
+        dealcards# TODO: add precondition: self.table == []
+
+
+# why does this one produces an error?
+#return not (bool(self.stock) and bool(self.hands[Player.NORTH]) and bool(self.hands[Player.SOUTH]))
+
+# TODO: remove _is_endgame, _winner, etc. (or make it work--check that) -- is not working as well as I want and it is redundant
+tests:
+	$(PER) pytest tests/
+
+
+
+
+unittests:?
+	$(PER) pytest --cov=bisca --mypy tests/unit/
+
+
+"""
+#return False if isinstance(other, TrumpCard) else self.rank > other.rank
+# TODO: should I add "->" to magic methods?
+-- focus: clean code, not speed
+# TODO: can I add freeze? Card is not to be altered... any I should probably turn each into singleton -- check speed hit
+# TODO: use is_trump instead of isinstance?
+"""
+# ----------------------------------------------------------------------------------------------------------------------
+"""
+# TODO: add docstrings -- these are just some nodes
+dataclass, Enum, SystemRandom, typing.List
+
+RANK_ORDER
+RANK_SCORE
+
+class Rank(Enum)
+    __gt__(other)
+class Suit(Enum)
+
+dataclass Card
+    __gt__
+    __repr__
+    get_deck(shuffle=True)
+    get_trump_version()
+    score
+
+TrumpCard(Card)
+    __gt__(other)
+    __repr_()
+
+TODO: better in UML pic?
+"""
+# ----------------------------------------------------------------------------------------------------------------------
+
+pipenv install --python 3.7
+pipenv install --dev "pytest>=5.2.2" "pytest-mock>=1.11.2" "hypothesis>=4.42.0" "black==19.3b0" "mypy>=0.740" "pytest-mypy>=0.4.1"
+
+work, test
+github -- continous integ?
+testpypi
+
+-- commit with author
+- use my email?
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+pipenv.core
+t@blackcathome:~/Documentos/Study/CompSci/Source Code (3rd party software)/pipenv/pipenv$ grep 🐍 .
+grep: .: É uma directoria
+blackcat@blackcathome:~/Documentos/Study/CompSci/Source Code (3rd party software)/pipenv/pipenv$ grep -R 🐍 .
+./pipenv/pipenv.1:🐍   ❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒ 5/5 — 00:00:03
+./pipenv/core.py:        INSTALL_LABEL = "🐍   "
+./docs/advanced.rst:    🐍   ❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒❒ 5/5 — 00:00:03
+blackcat@blackcathome:~/Documentos/Study/CompSci/Source Code (3rd party software)/pipenv/pipenv$ ls
+
+
+
+
+
+"""
+# bisca -- lib part, game rules
+# TkBisca -- the gui
+# put agents where? might be a good idea to do biscaAI?
+
+
+
+
+if __name__ == "__main__":
+    print(RandomAgent())
+
+
+
+
+    # TODO: will need inits *args, **kwargs for future work
+    def __init__(self, name: str):
+        self.name = name
+
+
+    # TODO: not state, needs hand, trump, scores, piles (unless it memorizes it to know which were played), table,
+    is_score (in variant?), other_hand_size?
+
+    @abstractmethod
+    def get_move(self, state: State) -> Card:
+        raise NotImplementedError
+
+# TODO: might be better to put name in another form (need to nickname classes not each agent
+"""
+
+
+
+
+""
+# TODO: add docstrings -- these are just notes
+
+Game
+    __init__(agents, eldest=0)
+    __repr__(self)
+    run()
+    run_multiple(agents, num_times=10)
+
+# TODO: still a bit unsure about this class...
+""
+# ---------------------
+""
+class Game:
+    # TODO: ok, this one will have to deal with agents, but don't think about gui yet
+    # TODO: game can implement history and undo
+
+
+    @staticmethod
+    def run_multiple(agents: List[Agent], num_times=10) -> Dict[Optional[int], int]:
+        results = {winner: 0 for winner in (0, 1, None)}
+
+        for _ in range(num_times // 2): # TODO: this bit needs to be well documented
+            for eldest in (0, 1):
+                game = Game(agents, eldest)
+                game_winner, game_score = game.run()
+                results[game_winner] += 1
+
+        return results
+""
+# -----------------------------------
+""
+#def main():
+    agents1 = [LazyAgent("Alice"), LazyAgent("Bob")]
+
+    print(agents1)
+    game = Game(agents1)
+    print(game)
+    winner, score = game.run()
+    print(winner, score)
+    print()
+
+    results = Game.run_multiple(agents1)
+    print(results, sum(results.values()))
+    print()
+
+    agents2 = [RandomAgent("Carl"), RandomAgent("Denise")]  # TODO: use tuple?
+    print(agents2)
+    results = Game.run_multiple(agents2, 100)
+    print(results, sum(results.values()))
+    ""
+
+    ""
+    import csv
+
+    def rungame(agents, nb):
+        for eldest in (0, 1):
+            for _ in range(nb // 2):
+                game = Game(agents, eldest)
+                # print(game)
+                winner, score = game.run()
+                # print(winner, score)
+                # TODO: might be better to have winner as -1, 0, 1 (less trouble)
+                #print(i, eldest, winner, 60 if score is None else score, 60 if score is None else (120 - score))
+                yield eldest, winner, 60 if score is None else score
+
+    import time
+    begin = time.time()
+    #print(time.time())
+    #agents3 = [RandomAgent("Earl"), RandomAgent("Filo")]
+    agents4 = [WeirdAgent("Guido"), RandomAgent("Helena")]
+    #nb = 10000  # ~6sec
+    nb = 1000000    # should be 600sec == 10min
+    #nb = 2  # use even only
+    with open("game_weird_vs_random.csv", "w") as csvfile:
+        csvwriter = csv.writer(csvfile)
+        for i, info in enumerate(rungame(agents4, nb)):
+            #print(*info)
+            csvwriter.writerow(info)    # eldest, winner, score
+            if i % 1000 == 0:
+                print(f"{(i / nb) * 100}%")     # really need a progress bar...
+    end = time.time()
+    print(f"{end - begin} seconds")     # 1000000 -> 772.233234167099 seconds = 129.4945562759367 games/sec
+    ""
+
+    ""
+    agents4 = [WeirdAgent("Guido"), RandomAgent("Helena")]  # 0 1
+    print(agents4)
+    results = Game.run_multiple(agents4, 10000)
+    print(results, sum(results.values()))   # {0: 417, 1: 563, None: 20} 1000
+    # {0: 4258, 1: 5552, None: 190} 10000
+    # ok, this is good to test some stuff
+""
+# ----------------------------------
+""
+    ""# {0: 405, 1: 576, None: 19} 1000
+
+    agents4 = [WeirdAgent("Guido", index=-1), RandomAgent("Helena")]  # 0 1
+    print(agents4)
+    results = Game.run_multiple(agents4, 1000)
+    print(results, sum(results.values()))   # {0: 502, 1: 477, None: 21} 1000 -- yup, going with largest works better""
+
+    ""
+    agents4 = [WeirdAgent("Guido"), RandomAgent("Helena")]  # 0 1
+    print(agents4)
+    results = Game.run_multiple(agents4, 1000)
+    print(results, sum(results.values()))   # {0: 497, 1: 488, None: 15} 1000   # hmmm, what about...
+    change to keep trumps for last
+    ""
+
+    ""
+    agents4 = [WeirdAgent("Guido"), RandomAgent("Helena")]  # 0 1
+    print(agents4)
+    results = Game.run_multiple(agents4, 1000)
+    print(results, sum(results.values()))   # {0: 498, 1: 476, None: 26} 1000
+    ""
+
+    ""
+    agents4 = [WeirdAgent("Guido"), RandomAgent("Helena")]  # 0 1
+    print(agents4)
+    results = Game.run_multiple(agents4, 1000)
+    print(results, sum(results.values()))   # {0: 476, 1: 506, None: 18} 1000
+    # TODO: interesting, but not really useful, erase this bit later
+    ""
+""
+# -----------------------------------
+""
+if __name__ == "__main__":
+    main()
+""
+# -----------------------------------
+""
+def main():
+    state = State()
+    print(state)
+    print("=" * 80)
+
+    ""
+    while not state.is_endgame():
+        for _ in range(NUM_PLAYERS):
+            move = state.hands[state.turn][0]   # lazy player
+            print(move)
+            state.play(move)
+            print(state)
+        print("=" * 80)
+    print(state.winner, state.scores[state.winner])
+    ""
+""
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ The Free Software Foundation recommends taking the additional step of adding a boilerplate notice to the top of each file. The boilerplate can be found at the end of the license.
+
+Add GPL-3.0-or-later (or GPL-3.0-only to disallow future versions) to your project's package description, if applicable (e.g., Node.js, Ruby, and Rust). This will ensure the license is displayed in package directories.
+
+
+"""
+TODO
+====
+
+- add mypy check
+- state.winner, state.score, state.is_endgame need work
+
+- go for tkinter gui (ran into issues with working with buildozer)
+
+
+TODO: refactor
+- create gui...
+
+- add tests
+- gui thoughts (text first?)
+- add save game (for layer analysis, undo, etc.)
+
+- later: separation into: "lib-bisca" (state,
+etc.), "bisca-gui" and "bisca-engines" (last
+two depend on "lib-bisca") -- and Bisca (all
+together) [yup, need better names]
+
+- later: check
+https://www.chessprogramming.org/Chess_Engine_Communication_Protocol,
+https://www.chessprogramming.org/images/8/89/Xboard.gif and
+https://github.com/pychess/pychess for inspiration
+(and add thanks)
+- better name than "assets" (correct place?)
+- add kivy req in system to readme
+- remove unnecessary cards image
+- card images -- better size (way to use .svg?)
+- size control, etc. (like mancala-dev app -- fixedlayout?)
+"""
