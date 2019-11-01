@@ -7,11 +7,20 @@ init:
 black:
 	$(PER) black -tpy37 .
 
-unit: black
+unit:
 	$(PER) pytest tests/unit
 
-integration: black
+integration:
 	$(PER) pytest tests/integration
 
-test: black
+test:
 	$(PER) pytest tests
+
+cov:
+	$(PER) pytest --cov=libbisca tests
+
+build:
+	python setup.py sdist bdist_wheel
+
+upload: build
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*

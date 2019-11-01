@@ -4,6 +4,9 @@ python:
 
 cache: pip
 
+before_install:
+  - pip install codecov
+
 # command to install dependencies
 install:
   - pipenv lock -r --dev > requirements.txt
@@ -11,4 +14,7 @@ install:
 
 # command to run tests
 script:
-  - pytest
+  - pytest --cov=libbisca
+
+after_success:
+  codecov   # submit coverage

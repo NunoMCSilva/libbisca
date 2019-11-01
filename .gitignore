@@ -128,3 +128,8 @@ dmypy.json
 
 # PyCharm project settings
 .idea/
+
+# TODO: temporary removed from .gitignore
+/mypy.ini
+/notes.txt
+do_profile.py
