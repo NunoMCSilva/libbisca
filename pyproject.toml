@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "libbisca"
+author = "Nuno Miguel Casteloa da Silva"
+author-email = "NunoMCSilva@gmail.com"
+home-page = "https://github.com/NunoMCSilva/libbisca"
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+
