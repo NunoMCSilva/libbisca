@@ -1,7 +1,7 @@
 # TODO: add docstrings
 
 from enum import IntEnum
-from typing import Dict, List, Optional, Tuple, Union  # TODO: remove unneeded
+from typing import Optional, Tuple
 
 # TODO: relative imports
 from libbisca.card import Card, Deck
@@ -76,7 +76,7 @@ class State:
             return None
 
     def do_rollout(self):
-        # do random roll-out
+        # do random rollout
         raise NotImplementedError  # TODO: implement this
 
     def get_score(self, player: Player) -> int:
