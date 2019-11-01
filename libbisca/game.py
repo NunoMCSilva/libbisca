@@ -1,47 +1,27 @@
 # TODO: add docstrings
 
-from typing import Dict, Optional, Sequence, Tuple
+from pathlib import PurePath            # TODO: PurePath or Path?
+from typing import Optional, Tuple
 
-from libbisca.agent import Agent
 from libbisca.card import Card
-from libbisca.state import State, Player, Winner
+from libbisca.state import State, Player
 
 
 class Game:
-    # TODO: make clear Game is to run State (mostly for dev, since State will have a do_rollout)
-    # TODO: might be a good idea to separate this into Runner in dev, and keep this one as a undo/history (saves full history, allows load)
 
-    def __init__(self, agents: Sequence[Agent], eldest: Player = Player.SOUTH):
-        self.agents = agents
-        self.state = State(eldest)
-
-    # TODO: add load/save to json?
-    # TODO: add undo? or not necessary in non-gui
-    # TODO: keep "log" to save?
-    # TODO: add history (necessary for undo?)?
-
-    def run(self) -> State:
-        # This might belong in State, but I prefer to keep it here so state doesn't have to deal with agents
-        while not self.state.is_endgame():
-            # TODO: give ObservedState instead of state: ObservedState(self.state)
-            move = self.agents[self.state.turn].get_move(self.state)
-            self.state.play(move)
-
-        return self.state
-
-    def step(self, move: Card) -> Optional[Tuple[Player, int]]:
-        # of use only (mostly) for a gui -- TODO: check that
-        return self.state.play(move)
+    def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = 3):
+        self.state = State(eldest, hand_size)
+        self.history = []   # TODO: check design patterns
 
     @staticmethod
-    def run_multiple(agents: Sequence[Agent], num_games=10) -> Dict[Winner, int]:
-        results = {winner: 0 for winner in Winner}
+    def load(self, fpath: PurePath) -> "Game":
+        raise NotImplementedError
 
-        for _ in range(num_games // 2):  # TODO: this bit needs to be well documented
-            for eldest in Player:
-                game = Game(agents, eldest)
-                state = game.run()
-                # TODO: state = Game(agents, eldest).run() ?
-                results[state.winner] += 1
+    def save(self, fpath: PurePath) -> None:
+        raise NotImplementedError
 
-        return results
+    def step(self, move: Card) -> Optional[Tuple[Player, int]]:
+        return self.state.play(move)
+
+    def undo(self, move: Card):     # TODO: add returns
+        raise NotImplementedError
