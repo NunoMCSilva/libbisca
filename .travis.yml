@@ -15,4 +15,4 @@ script:
   - pytest --cov=libbisca
 
 after_success:
-  codecov
+  python3 - m codecov
