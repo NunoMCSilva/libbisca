@@ -65,11 +65,15 @@ class Card:
     def score(self) -> int:
         return self.rank.score
 
+    # TODO: put outside? add (t) for trump
     @staticmethod
     def get_card(card_str: str) -> "Card":
         # TODO: needs refactoring
         # this is mostly for testing -- can use _DECK later (remember to save memory and maybe be faster)
+
         rank, suit = card_str
+        is_trump = "(t)" in card_str
+
         rank = {
             "A": Rank.ACE,
             "2": Rank.TWO,
@@ -88,7 +92,7 @@ class Card:
             "S": Suit.SPADES,
             "C": Suit.CLUBS,
         }[suit]
-        return Card(rank, suit)
+        return TrumpCard(rank, suit) if is_trump else Card(rank, suit)
 
     @staticmethod
     def is_trump() -> bool:

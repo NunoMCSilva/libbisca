@@ -110,9 +110,10 @@ def test__state_winner__initial_state__return_none():
     assert state.winner is None
 
 
-@pytest.mark.parametrize("score, winner", [
-    (0, Winner.DRAW), (90 - 30, Winner.SOUTH), (30 - 90, Winner.NORTH)
-])
+@pytest.mark.parametrize(
+    "score, winner",
+    [(0, Winner.DRAW), (90 - 30, Winner.SOUTH), (30 - 90, Winner.NORTH)],
+)
 def test__state_winner__final_state__x(score, winner):
     # arrange
     state = State()
@@ -135,9 +136,10 @@ def test__state_score_and_get_score__initial_state__return_none():
     assert state.get_score(Player.NORTH) == 0
 
 
-@pytest.mark.parametrize("south_score, score", [
-    (0, 0 - 120), (30, 30 - 90), (60, 0), (90, 90 - 30), (120, 120 - 0)
-])
+@pytest.mark.parametrize(
+    "south_score, score",
+    [(0, 0 - 120), (30, 30 - 90), (60, 0), (90, 90 - 30), (120, 120 - 0)],
+)
 def test__state_get_score__final_state__return_human_score(south_score, score):
     # arrange
     state = State()
@@ -149,7 +151,9 @@ def test__state_get_score__final_state__return_human_score(south_score, score):
 
     # act & assert
     assert state.get_score(Player.SOUTH) == south_score
-    assert state.get_score(Player.NORTH) == 120 - south_score   # TODO: put 120 in constant?
+    assert (
+        state.get_score(Player.NORTH) == 120 - south_score
+    )  # TODO: put 120 in constant?
 
 
 # TODO: check which of this tests add value to testing

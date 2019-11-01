@@ -1,7 +1,7 @@
 # TODO: add docstrings
 
 from enum import IntEnum
-from typing import Dict, List, Optional, Tuple, Union   # TODO: remove unneeded
+from typing import Dict, List, Optional, Tuple, Union  # TODO: remove unneeded
 
 # TODO: relative imports
 from libbisca.card import Card, Deck
@@ -20,8 +20,8 @@ class Winner(IntEnum):
 
 
 class State:
-    NUM_PLAYERS = 2     # code will only handle 2 player for now (and maybe in the future)
-    HAND_SIZE = 3       # TODO: extend code to Bisca9 later
+    NUM_PLAYERS = 2  # code will only handle 2 player for now (and maybe in the future)
+    HAND_SIZE = 3  # TODO: extend code to Bisca9 later
 
     def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = Player.SOUTH):
         self.turn = eldest
@@ -36,7 +36,9 @@ class State:
 
         # this is from the POV of Player.SOUTH
         self.score = 0
-        self._scores = {player: 0 for player in Player}     # TODO: ok, I need to get the score system to work better
+        self._scores = {
+            player: 0 for player in Player
+        }  # TODO: ok, I need to get the score system to work better
 
         # this is for a more efficient is_endgame - TODO: add len(self.stock)?
         self._cards_in_stock_and_hands = 40
@@ -64,7 +66,7 @@ class State:
     def winner(self) -> Optional[Winner]:
         if self.is_endgame():
             assert sum(self._scores.values()) == 120
-            #assert self.get_score(Player.SOUTH) == 120 - self.get_score(Player.NORTH)
+            # assert self.get_score(Player.SOUTH) == 120 - self.get_score(Player.NORTH)
 
             if self.score == 0:
                 return Winner.DRAW
@@ -75,7 +77,7 @@ class State:
 
     def do_rollout(self):
         # do random roll-out
-        raise NotImplementedError   # TODO: implement this
+        raise NotImplementedError  # TODO: implement this
 
     def get_score(self, player: Player) -> int:
         # human understandable score
@@ -126,4 +128,6 @@ class State:
         player1, player2 = self._table_player
         card1, card2 = self.table
         # (player1, card1), (player2, card2) = self.table
-        return player1 if card1 > card2 else player2        # TODO: place to add follow variant (diff class?)
+        return (
+            player1 if card1 > card2 else player2
+        )  # TODO: place to add follow variant (diff class?)
