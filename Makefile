@@ -9,5 +9,5 @@ install:
 black:
 	$(PER) black -tpy37 .
 
-unittest: black
+unittest:
 	$(PER) pytest tests/unit/
