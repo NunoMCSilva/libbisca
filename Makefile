@@ -16,6 +16,9 @@ integration:
 test:
 	$(PER) pytest tests
 
+cov:
+	$(PER) pytest --cov=libbisca tests
+
 build:
 	python setup.py sdist bdist_wheel
 
