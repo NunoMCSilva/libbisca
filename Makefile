@@ -7,10 +7,11 @@ init:
 black:
 	$(PER) black -tpy37 .
 
-unit:
+unit: black
 	$(PER) pytest tests/unit
 
-integration:
-	$(PER) pytest tests/unit
+integration: black
+	$(PER) pytest tests/integration
 
-test: black unit
+test: black
+	$(PER) pytest tests
