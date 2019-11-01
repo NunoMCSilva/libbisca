@@ -2,6 +2,7 @@ language: python
 python:
   - "3.7"
 install:
-  - make install
+  - make
+cache: pip
 script:
-  - make unittest
+  - make test
