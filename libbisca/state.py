@@ -175,13 +175,13 @@ class State(ABC):
             move = random.choice(self.get_allowed_moves())
             self.play(move)
 
+    def is_endgame(self) -> bool:
+        return self._cards_in_stock_and_hands == 0
+
     @abstractmethod
     def get_allowed_moves(self) -> List[Card]:
         # return cards in self.hand that are allowed to be played here
         raise NotImplementedError
-
-    def is_endgame(self) -> bool:
-        return self._cards_in_stock_and_hands == 0
 
     @abstractmethod
     def play(self, move: Card) -> Optional[Tuple[Player, int, List[Card]]]:
