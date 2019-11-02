@@ -12,10 +12,10 @@ class Agent(ABC):
         return f"{self.__class__.__name__}()"
 
     @abstractmethod
-    def get_move(self, state: State) -> Card:   # TODO: ObservedState) -> Card:
+    def get_move(self, state: State) -> Card:  # TODO: ObservedState) -> Card:
         raise NotImplementedError
 
 
 class RandomAgent(Agent):
-    def get_move(self, state: State) -> Card:   # TODO: ObservedState) -> Card:
+    def get_move(self, state: State) -> Card:  # TODO: ObservedState) -> Card:
         return random.choice(state.get_allowed_moves())
