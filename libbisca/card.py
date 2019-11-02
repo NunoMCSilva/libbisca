@@ -114,9 +114,6 @@ class Card:
     rank: Rank
     suit: Suit
 
-    def __hash__(self):
-        return hash((self.rank, self.suit))
-
     def __gt__(self, other: "Card"):
         # only gt is implemented, the others aren't really necessary
         # this compares card strength only, other issues are the state's responsibility
