@@ -190,3 +190,54 @@ class TestStateVariant1:
 
         # assert
         assert winner == eldest if did_eldest_win else eldest.opponent
+
+    def test__state_winner__initial_state__return_zero(self):
+        # arrange
+        state = StateVariant1()
+
+        # act & assert
+        assert state.winner == 0
+
+    @pytest.mark.parametrize(
+        "south_score, north_score, expected_winner",
+        [
+            (120, 0, Winner.SOUTH),
+            (90, 30, Winner.SOUTH),
+            (60, 60, Winner.DRAW),
+            (30, 90, Winner.NORTH),
+            (0, 120, Winner.NORTH),
+        ],
+    )
+    def test__state_winner__final_state__return_expected_nit(
+        self, south_score, north_score, expected_winner
+    ):
+        # arrange
+        state = StateVariant1()
+        state._cards_in_stock_and_hands = 0
+        state._scores[Player.SOUTH] = south_score
+        state._scores[Player.NORTH] = north_score
+
+        # act & assert
+        assert state.winner == expected_winner
+
+    @pytest.mark.parametrize(
+        "south_score, north_score, expected_score",
+        [
+            (120, 0, 120),
+            (90, 30, 90),
+            (60, 60, 60),
+            (30, 90, 90),
+            (0, 120, 120),
+        ],
+    )
+    def test__state_winner__final_state__return_expected_int(
+        self, south_score, north_score, expected_score
+    ):
+        # arrange
+        state = StateVariant1()
+        state._cards_in_stock_and_hands = 0
+        state._scores[Player.SOUTH] = south_score
+        state._scores[Player.NORTH] = north_score
+
+        # act & assert
+        assert state.score == expected_score
