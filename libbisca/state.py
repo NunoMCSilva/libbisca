@@ -55,7 +55,40 @@ class HandSize(Enum):
 class State(ABC):
     """Represents a game state (snapshot)
 
-    # TODO: complete docstring (check google recs first)
+    # TODO: complete/fix docstring (check google recs first)
+    Attributes
+    ----------
+    NUM_PLAYERS : int
+        num of players
+    HAND_SIZE : int
+        num of cards in hand
+    turn : Player
+        game turn
+    stock : List[Card]
+        un-dealt stock of cards
+    trump : Card
+        game trump
+    hands : Dict[Player, Card]
+        player cards in hands
+    table : List[Card]
+        cards on the table
+    score : int
+        score from the pov of the South player: (South score - North score)
+
+    Methods
+    -------
+    do_rollout()
+        continue game with random moves until endgame (useful for Monte Carlo agents)
+    get_score(player)
+        return score of given player
+    is_endgame()
+        return True if this is a endgame/terminal state, False otherwise
+    play(move)
+        modify state by playing the given card
+    opponent
+        return player currently not in turn
+    winner
+        return winner of game on endgame state, None otherwise
     """
 
     NUM_PLAYERS = 2  # for now, code will only handle 2 players
@@ -63,6 +96,15 @@ class State(ABC):
     def __init__(
         self, eldest: Player = Player.SOUTH, hand_size: HandSize = HandSize.THREE
     ):
+        """
+        # TODO: complete/fix docstring (check google recs first)
+        Parameters
+        ----------
+        eldest : Player
+            first player to move
+        hand_size : int
+            player hand size (3, 7 ou 9)
+        """
         self.hand_size = hand_size.value
 
         self.turn = eldest
