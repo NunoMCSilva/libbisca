@@ -11,6 +11,7 @@ Exports the following classes:
 from abc import ABC, abstractmethod
 import copy
 from enum import Enum, IntEnum
+import random
 from typing import List, Optional, Tuple
 
 from libbisca.card import Card, Deck
@@ -82,8 +83,6 @@ class State(ABC):
         for _ in range(self.hand_size):
             self._deal_cards()
 
-    # TODO: __hash__?
-
     def __repr__(self):
         # TODO: ( -> {, etc. in hands
 
@@ -128,9 +127,16 @@ class State(ABC):
     def copy(self) -> "State":
         return copy.deepcopy(self)
 
-    def do_rollout(self):
-        # do random rollout
-        pass  # TODO: implement this
+    def do_rollout(self) -> None:
+        # do random rollout -- TODO: add test for this
+        while not self.is_endgame():
+            move = random.choice(self.get_allowed_moves())
+            self.play(move)
+
+    @abstractmethod
+    def get_allowed_moves(self) -> List[Card]:
+        # return cards in self.hand that are allowed to be played here
+        raise NotImplementedError
 
     def is_endgame(self) -> bool:
         return self._cards_in_stock_and_hands == 0
@@ -181,12 +187,16 @@ class StateVariant1(State):
 
         return None
 
+    def get_allowed_moves(self) -> List[Card]:
+        # return cards in self.hand that are allowed to be played here
+        # in this variant, player can play any card at any time (no restriction)
+        return self.hand
+
     def _get_round_winner(self) -> Player:
         card1, card2 = self.table
         eldest, youngest = self._table_played
 
         # follow is not mandatory, but if youngest plays a different suit than is not trump, eldest wins
-
         if card1.suit != card2.suit:
             if card2.is_trump():
                 return youngest
