@@ -57,7 +57,16 @@ Rank._STR_TO_RANK = {
     "K": Rank.KING,
 }
 Rank.DECK_ORDER = (
-    Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX, Rank.SEVEN, Rank.QUEEN, Rank.JACK, Rank.KING
+    Rank.ACE,
+    Rank.TWO,
+    Rank.THREE,
+    Rank.FOUR,
+    Rank.FIVE,
+    Rank.SIX,
+    Rank.SEVEN,
+    Rank.QUEEN,
+    Rank.JACK,
+    Rank.KING,
 )
 
 # Suit =================================================================================================================
@@ -160,7 +169,6 @@ class TrumpCard(Card):
 
 # Deck =================================================================================================================
 class Deck(list):
-
     def __init__(self, shuffle=True):
         deck = [Card(rank, suit) for suit in Suit for rank in Rank.DECK_ORDER]
 
@@ -178,6 +186,7 @@ class Deck(list):
 
         super().__init__(map(func, deck))
 
+    @property
     def bottom(self) -> Card:
         # bottom of deck
         return self[0]
@@ -197,4 +206,6 @@ def get_card(card_str: str) -> Card:
         card_str = card_str[0:2]
 
     rank, suit = card_str
-    return card_cls(Rank.get_rank(rank), Suit.get_suit(suit))   # TODO: check this PyCharm warning
+    return card_cls(
+        Rank.get_rank(rank), Suit.get_suit(suit)
+    )  # TODO: check this PyCharm warning
