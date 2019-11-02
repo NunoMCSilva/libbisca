@@ -1,37 +1,64 @@
-# TODO: add docstrings
-# TODO: decide which methods/etc are better as _"private"
+"""Card
+
+Implements Bisca card related classes.
+
+This module exports the following classes:
+    * Rank - enum representing all ranks supported by Bisca cards (Bisca doesn't support 8s, 9s, and 10s)
+    * Suit - enum representing all suits (Hearts, Diamonds, Spades, Clubs)
+    * Card - Bisca Card
+    * TrumpCard - Bisca Card marked as being a trump
+    * Deck - a game deck (a list of cards)
+"""
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, IntEnum, auto
 from random import SystemRandom
-from typing import List
 
 
 # Rank =================================================================================================================
-class Rank(Enum):
-    ACE = "A"
-    TWO = "2"
-    THREE = "3"
-    FOUR = "4"
-    FIVE = "5"
-    SIX = "6"
-    SEVEN = "7"
-    QUEEN = "Q"
-    JACK = "J"
-    KING = "K"
+class Rank(IntEnum):
+    # sort order of ranks (which is greater)
+    TWO = auto()
+    THREE = auto()
+    FOUR = auto()
+    FIVE = auto()
+    SIX = auto()
+    QUEEN = auto()
+    JACK = auto()
+    KING = auto()
+    SEVEN = auto()
+    ACE = auto()
 
-    def __gt__(self, other: "Rank"):
-        # TODO: ok, this might be improved...
-        return self._ORDER.index(self.value) > self._ORDER.index(other.value)
+    # TODO: recheck this, but right now it seems ok -- format used by f-strings
+    def __format__(self, format_spec):
+        # TODO: check format_spec
+        return str(self)
 
-    @property
-    def score(self) -> int:
-        return self._SCORE.get(self.value, 0)
+    def __str__(self):
+        # TODO: any use to put "23... in a _STR class constant?
+        return "23456QJK7A"[self.value - 1]
+
+    @staticmethod
+    def get_rank(rank_str):
+        return Rank._STR_TO_RANK[rank_str]  # TODO: check this PyCharm warning
 
 
-Rank._ORDER = "23456QJK7A"
-Rank._SCORE = {"Q": 2, "J": 3, "K": 4, "7": 10, "A": 11}
-
+# there are better solutions to putting constants in enums, but this one if good enough for now
+Rank._STR_TO_RANK = {
+    "A": Rank.ACE,
+    "2": Rank.TWO,
+    "3": Rank.THREE,
+    "4": Rank.FOUR,
+    "5": Rank.FIVE,
+    "6": Rank.SIX,
+    "7": Rank.SEVEN,
+    "Q": Rank.QUEEN,
+    "J": Rank.JACK,
+    "K": Rank.KING,
+}
+Rank.DECK_ORDER = (
+    Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX, Rank.SEVEN, Rank.QUEEN, Rank.JACK, Rank.KING
+)
 
 # Suit =================================================================================================================
 class Suit(Enum):
@@ -40,12 +67,41 @@ class Suit(Enum):
     SPADES = "♠"
     CLUBS = "♣"
 
-    # TODO: add Trump Suit here as method?
+    def __format__(self, format_spec):
+        # TODO: check format_spec
+        return self.value
 
+    def __str__(self):
+        return self.value
+
+    @property
+    def trumped(self):
+        return self._TRUMPED[self]
+
+    @staticmethod
+    def get_suit(suit_str):
+        return Suit._STR_TO_SUIT[suit_str]  # TODO: check this PyCharm warning
+
+
+Suit._TRUMPED = {
+    Suit.HEARTS: "♡",
+    Suit.DIAMONDS: "♢",
+    Suit.SPADES: "♤",
+    Suit.CLUBS: "♧",
+}
+Suit._STR_TO_SUIT = {
+    "H": Suit.HEARTS,
+    "D": Suit.DIAMONDS,
+    "S": Suit.SPADES,
+    "C": Suit.CLUBS,
+}
 
 # Card =================================================================================================================
 @dataclass
 class Card:
+    # all cards not in _SCORE are worth 0 points
+    _SCORE = {Rank.QUEEN: 2, Rank.JACK: 3, Rank.KING: 4, Rank.SEVEN: 10, Rank.ACE: 11}
+
     rank: Rank
     suit: Suit
 
@@ -54,45 +110,25 @@ class Card:
 
     def __gt__(self, other: "Card"):
         # only gt is implemented, the others aren't really necessary
-        return False if other.is_trump() else self.rank > other.rank
+        # this compares card strength only, other issues are the state's responsibility
+        if other.is_trump():
+            # if other is trump, then self > other is ALWAYS False
+            return False
+        else:
+            return self.rank > other.rank
 
     def __repr__(self):
-        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this comment
+        # this should be in __str__ but I prefer to see this when I print a list of cards
         # "Although practicality beats purity." -- The Zen of Python
-        return f"{self.rank.value}{self.suit.value}"
+        return f"{self.rank}{self.suit}"
 
     @property
     def score(self) -> int:
-        return self.rank.score
+        # should probably be in rank, but with it here I save a call to self.rank.score...
+        return Card._SCORE.get(self.rank, 0)
 
-    # TODO: put outside? add (t) for trump
-    @staticmethod
-    def get_card(card_str: str) -> "Card":
-        # TODO: needs refactoring
-        # this is mostly for testing -- can use _DECK later (remember to save memory and maybe be faster)
-
-        rank, suit = card_str
-        is_trump = "(t)" in card_str
-
-        rank = {
-            "A": Rank.ACE,
-            "2": Rank.TWO,
-            "3": Rank.THREE,
-            "4": Rank.FOUR,
-            "5": Rank.FIVE,
-            "6": Rank.SIX,
-            "7": Rank.SEVEN,
-            "Q": Rank.QUEEN,
-            "J": Rank.JACK,
-            "K": Rank.KING,
-        }[rank]
-        suit = {
-            "H": Suit.HEARTS,
-            "D": Suit.DIAMONDS,
-            "S": Suit.SPADES,
-            "C": Suit.CLUBS,
-        }[suit]
-        return TrumpCard(rank, suit) if is_trump else Card(rank, suit)
+    def trumpify(self) -> "TrumpCard":
+        return TrumpCard(self.rank, self.suit)
 
     @staticmethod
     def is_trump() -> bool:
@@ -101,21 +137,21 @@ class Card:
 
 # TrumpCard ============================================================================================================
 class TrumpCard(Card):
-    # TODO: this might be better implemented in something TrumpSuit or...?
-    TRUMP_SUIT_STR = {
-        Suit.HEARTS: "♡",
-        Suit.DIAMONDS: "♢",
-        Suit.SPADES: "♤",
-        Suit.CLUBS: "♧",
-    }
+    # simplifies card comparision without the need to modify each card to set trump (and it looks good on print)
 
     def __gt__(self, other: "Card"):
-        return self.rank > other.rank if other.is_trump() else True
+        # only gt is implemented, the others aren't really necessary
+        # this compares card strength only, other issues are the state's responsibility
+        if other.is_trump():
+            return self.rank > other.rank
+        else:
+            # self(t) > other, always
+            return True
 
     def __repr__(self):
-        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this
+        # this should be in __str__ but I prefer to see this when I print a list of cards
         # "Although practicality beats purity." -- The Zen of Python
-        return f"{self.rank.value}{TrumpCard.TRUMP_SUIT_STR[self.suit]}"
+        return f"{self.rank}{self.suit.trumped}"
 
     @staticmethod
     def is_trump() -> bool:
@@ -123,27 +159,42 @@ class TrumpCard(Card):
 
 
 # Deck =================================================================================================================
-class Deck:
-    def __init__(self, shuffle=True):
-        # TODO: replace by module level _DECK (memory saves) and do copy or something? [or change __deepcopy__ in Card?]
-        deck = [Card(rank, suit) for suit in Suit for rank in Rank]
+class Deck(list):
 
+    def __init__(self, shuffle=True):
+        deck = [Card(rank, suit) for suit in Suit for rank in Rank.DECK_ORDER]
+
+        # shuffle
         if shuffle:
             # SystemRandom is necessary to generate all of the 40! possibilities
             SystemRandom().shuffle(deck)
 
-        # set trumps
-        self.deck = [
-            (TrumpCard(card.rank, card.suit) if card.suit == deck[0].suit else card)
-            for card in deck
-        ]
+        # signal trumps -- TODO: make this more elegant
+        def func(card: Card) -> Card:
+            if card.suit != deck[0].suit:
+                return card
+            else:
+                return card.trumpify()
 
-    def __str__(self):
-        return str(self.deck)
+        super().__init__(map(func, deck))
 
-    @property
     def bottom(self) -> Card:
-        return self.deck[0]
+        # bottom of deck
+        return self[0]
 
-    def pop(self) -> Card:
-        return self.deck.pop()
+    def take_top(self) -> Card:
+        # take card from top of deck
+        return self.pop()
+
+
+# functions ============================================================================================================
+def get_card(card_str: str) -> Card:
+    # mostly for testing purposes - get_card("2H") is easier to type than Card(Rank.TWO, Suit.HEARTS)
+
+    card_cls = Card
+    if "(t)" in card_str:
+        card_cls = TrumpCard
+        card_str = card_str[0:2]
+
+    rank, suit = card_str
+    return card_cls(Rank.get_rank(rank), Suit.get_suit(suit))   # TODO: check this PyCharm warning
