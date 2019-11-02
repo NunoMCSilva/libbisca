@@ -63,7 +63,7 @@ class TestCardAndTrumpCard:
             ("AC", "7H", True),  # AC > 7H
             ("AC(t)", "7H(t)", True),  # AC(t) > 7H(t)
             ("6D", "7C", False),  # 6D < 7C
-            ("6D(t)", "7C(t)", False),    # 6D(t) < 7C(t)
+            ("6D(t)", "7C(t)", False),  # 6D(t) < 7C(t)
             # different type
             ("2D(t)", "7C", True),  # 2D(t) > 7C
             ("3D", "2S(t)", False),  # 3D < 2S(t)
@@ -79,7 +79,6 @@ class TestCardAndTrumpCard:
 
 
 class TestDeck:
-
     def test__non_shuffled_deck__returns_expected_deck(self):
         # arrange
         expected = (
@@ -92,7 +91,6 @@ class TestDeck:
 
 
 class TestGetCard:
-
     def test__any_card_str__return_expected_card(self):
         assert get_card("JS") == Card(Rank.JACK, Suit.SPADES)
 
