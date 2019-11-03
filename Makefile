@@ -11,19 +11,7 @@ black:
 
 # tests
 unit:
-	$(PER) pytest tests/unit
-
-integration:
-	$(PER) pytest tests/integration
-
-test:
-	$(PER) pytest tests
-
-cov:
-	$(PER) pytest --cov=$(PROJ) tests
-
-mypy:
-	$(PER) mypy -p $(PROJ)
+	$(PER) pytest --cov=$(PROJ) --mypy tests/unit
 
 
 # PyPI
