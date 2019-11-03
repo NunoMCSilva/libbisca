@@ -10,7 +10,7 @@ class TestCard:
     def test__lt__two_cards__returns_expected(self, cards):
         # arrange
         c1, comp, c2 = cards.split(" ")
-        c1, c2 = [get_card(c) for c in (c1, c2)]
+        c1, c2 = [Card.get_card(c) for c in (c1, c2)]
         expected = True if comp == "<" else False
 
         # act & Assert
@@ -32,10 +32,9 @@ class TestCard:
         # act & assert
         assert card.score == 2
 
+    def test__get_card__any_card_str__returns_expected(self):
+        # arrange
+        card = Card(Rank.QUEEN, Suit.SPADES)
 
-def test__get_card__any_card_str__returns_expected():
-    # arrange
-    card = Card(Rank.QUEEN, Suit.SPADES)
-
-    # act & assert
-    assert get_card("QS") == card
+        # act & assert
+        assert Card.get_card("QS") == card

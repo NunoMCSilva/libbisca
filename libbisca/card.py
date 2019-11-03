@@ -2,6 +2,9 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import List, NewType
+
+Deck = NewType("Deck", List["Card"])
 
 
 class Rank(Enum):
@@ -30,6 +33,10 @@ class Card:
     rank: Rank
     suit: Suit
 
+    _SCORE = {Rank.QUEEN: 2, Rank.JACK: 3, Rank.KING: 4, Rank.SEVEN: 10, Rank.ACE: 11}
+    _RANK_STR_TO_RANK = {rank.value: rank for rank in Rank}
+    _SUIT_STR_TO_SUIT = {suit.value: suit for suit in Suit}
+
     def __gt__(self, other: "Card"):
         # only gt is implemented, state doesn't need the others
         # this compares card strength ONLY, other issues are the state's responsibility (e.g. trump)
@@ -40,16 +47,17 @@ class Card:
 
     @property
     def score(self) -> int:
-        scores = {
-            k: v for k, v in zip(Rank, 5 * [0] + [2, 3, 4, 10, 11])
-        }  # put elsewhere
-        return scores[self.rank]
+        return Card._SCORE.get(self.rank, 0)
 
+    @staticmethod
+    def get_card(card_str: str) -> "Card":
+        rank_str, suit_str = card_str
 
-def get_card(card_str: str) -> Card:
-    # put at module level or just generate _STR_TO_CARDS
-    ranks = {rank.value: rank for rank in Rank}
-    suits = {suit.value: suit for suit in Suit}
+        rank = Card._RANK_STR_TO_RANK[rank_str]
+        suit = Card._SUIT_STR_TO_SUIT[suit_str]
 
-    rank, suit = card_str
-    return Card(ranks[rank], suits[suit])
+        return Card(rank, suit)
+
+    @staticmethod
+    def get_deck(shuffled=True) -> Deck:
+        pass
