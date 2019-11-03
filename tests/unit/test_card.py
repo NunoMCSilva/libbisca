@@ -6,13 +6,6 @@ from libbisca.card import *
 
 
 class TestCard:
-    def test__get_card__any_card_str__returns_expected(self):
-        # arrange
-        card = Card(Rank.QUEEN, Suit.SPADES)
-
-        # act & assert
-        assert Card.get_card("QS") == card
-
     @pytest.mark.parametrize("cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C"])
     def test__lt__two_cards__returns_expected(self, cards):
         # arrange
@@ -41,3 +34,38 @@ class TestCard:
 
         # act & assert
         assert card.score == score
+
+    def test__get_card__any_card_str__returns_expected(self):
+        # arrange
+        card = Card(Rank.QUEEN, Suit.SPADES)
+
+        # act & assert
+        assert Card.get_card("QS") == card
+
+    def test__get_deck__not_shuffled__returns_expected(self):
+        # arrange
+        deck = (
+            "2H 3H 4H 5H 6H QH JH KH 7H AH 2D 3D 4D 5D 6D QD JD KD 7D AD 2S 3S 4S 5S 6S QS JS KS 7S AS "
+            "2C 3C 4C 5C 6C QC JC KC 7C AC"
+        )
+        expected = [Card.get_card(s) for s in deck.split(" ")]
+
+        # act & assert
+        assert Card.get_deck(shuffle=False) == expected
+
+    def test__get_deck__shuffled__x(self):
+        # arrange
+        deck = (
+            "2H 3H 4H 5H 6H QH JH KH 7H AH 2D 3D 4D 5D 6D QD JD KD 7D AD 2S 3S 4S 5S 6S QS JS KS 7S AS "
+            "2C 3C 4C 5C 6C QC JC KC 7C AC"
+        )
+        expected = [Card.get_card(s) for s in deck.split(" ")]
+
+        # act
+        deck = Card.get_deck()
+
+        # act & assert
+        assert deck != expected
+        assert set(deck) == set(
+            expected
+        )  # sorted is uncertain here - unimportant for now
