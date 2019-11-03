@@ -6,6 +6,13 @@ from libbisca.card import *
 
 
 class TestCard:
+    def test__get_card__any_card_str__returns_expected(self):
+        # arrange
+        card = Card(Rank.QUEEN, Suit.SPADES)
+
+        # act & assert
+        assert Card.get_card("QS") == card
+
     @pytest.mark.parametrize("cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C"])
     def test__lt__two_cards__returns_expected(self, cards):
         # arrange
@@ -25,16 +32,12 @@ class TestCard:
         # act & assert
         assert repr(card) == "QS"
 
-    def test__score__any_card__returns_expected(self):
+    @pytest.mark.parametrize(
+        "card_str, score", [("7S", 10), ("QH", 2), ("2C", 0), ("5D", 0)]
+    )
+    def test__score__any_card__returns_expected(self, card_str, score):
         # arrange
-        card = Card(Rank.QUEEN, Suit.SPADES)
+        card = Card.get_card(card_str)
 
         # act & assert
-        assert card.score == 2
-
-    def test__get_card__any_card_str__returns_expected(self):
-        # arrange
-        card = Card(Rank.QUEEN, Suit.SPADES)
-
-        # act & assert
-        assert Card.get_card("QS") == card
+        assert card.score == score
