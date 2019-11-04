@@ -89,8 +89,10 @@ class Card:
     def get_deck(shuffle=True) -> Deck:
         # WARNING: experimental -->
         # not shuffled deck is ordered by sort order not original deck order
-        # considered not an issues, since unshuffle is only fo rtests
-        deck = [Card(rank, suit) for suit in Suit for rank in Rank]
+        # considered not an issues, since unshuffle is only for tests
+        ranks_ = [Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX, Rank.SEVEN, Rank.QUEEN, Rank.JACK,
+                  Rank.KING]
+        deck = [Card(rank, suit) for suit in Suit for rank in ranks_]
 
         if shuffle:
             # SystemRandom is necessary to generate all of the 40! possibilities
