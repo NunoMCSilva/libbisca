@@ -1,25 +1,30 @@
 """Card
 
 Implements Bisca card related classes.
-
+# TODO: improve docstrings
 This module exports the following classes:
     * Rank - enum representing all ranks supported by Bisca cards: 23456QJK7A
     * Suit - enum representing all suits: Hearts, Diamonds, Spades, Clubs
     * Card - Bisca Card
+    * Deck -- TODO: add
 
-# TODO: check how to document new type Deck
+This module exports the following functions:
+    * get_card -- TODO: add
+    * get_cards -- TODO: add
 """
 
 from dataclasses import dataclass
 from enum import Enum
+from random import SystemRandom
+from typing import List
+
 
 # WARNING: experimental -->
-# import random
-from random import SystemRandom
 import typing
-from typing import List, NewType
 
-Deck = NewType("Deck", List["Card"])
+# from typing import NewType# TODO: check how to document new type Deck
+
+# Deck = NewType("Deck", List["Card"])
 # WARNING: <-- experimental
 
 
@@ -44,13 +49,14 @@ class Suit(Enum):
     CLUBS = "C"
 
 
-@dataclass(unsafe_hash=True)  # only useful for testing for now
+@dataclass(unsafe_hash=True)  # for now, this is only useful for testing
 class Card:
     # TODO: add docstrings
 
     rank: Rank
     suit: Suit
 
+    # WARNING: experimental -->
     _SCORE = {
         Rank.QUEEN: 2,
         Rank.JACK: 3,
@@ -60,6 +66,7 @@ class Card:
     }  # all other cards are worth 0 points
     _RANK_STR_TO_RANK = {rank.value: rank for rank in Rank}
     _SUIT_STR_TO_SUIT = {suit.value: suit for suit in Suit}
+    # WARNING: experimental <--
 
     def __gt__(self, other: "Card"):
         # only gt is implemented, state doesn't need the others
@@ -75,22 +82,14 @@ class Card:
     def score(self) -> int:
         return Card._SCORE.get(self.rank, 0)
 
-    @staticmethod
-    def get_card(card_str: str) -> "Card":
-        # factory method -- mostly for testing
-        rank_str, suit_str = card_str
 
-        rank = Card._RANK_STR_TO_RANK[rank_str]
-        suit = Card._SUIT_STR_TO_SUIT[suit_str]
-
-        return Card(rank, suit)
-
-    @staticmethod
-    def get_deck(shuffle=True) -> Deck:
+class Deck(list):
+    def __init__(self, shuffle=True):
         # WARNING: experimental -->
+        # factory method?
         # not shuffled deck is ordered by sort order not original deck order
-        # considered not an issues, since unshuffle is only for tests
-        ranks_ = [
+        # considered not an issues, since un-shuffled is only for tests
+        ranks = [
             Rank.ACE,
             Rank.TWO,
             Rank.THREE,
@@ -101,19 +100,33 @@ class Card:
             Rank.QUEEN,
             Rank.JACK,
             Rank.KING,
-        ]
-        deck = [Card(rank, suit) for suit in Suit for rank in ranks_]
+        ]  # put this order in rank? call it deck order?
+        super().__init__(Card(rank, suit) for suit in Suit for rank in ranks)
 
         if shuffle:
-            # SystemRandom is necessary to generate all of the 40! possibilities
-            SystemRandom().shuffle(deck)
-            # possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
+            self.shuffle()
 
-        return typing.cast(Deck, deck)  # typing hint, does nothing to code
+        # return typing.cast(Deck, deck)  # typing hint, does nothing to code
         # WARNING: experimental <--
+
+    def shuffle(self) -> None:
+        # WARNING: experimental <--
+        # SystemRandom is necessary to generate all of the 40! possibilities
+        SystemRandom().shuffle(self)
+        # possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
+
+
+def get_card(card_str: str) -> Card:
+    # factory method -- mostly for testing
+    rank_str, suit_str = card_str
+
+    rank = Card._RANK_STR_TO_RANK[rank_str]
+    suit = Card._SUIT_STR_TO_SUIT[suit_str]
+
+    return Card(rank, suit)
 
 
 def get_cards(cards: str) -> List[Card]:
     # helper function, useful for testing
     # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
-    return [Card.get_card(s) for s in cards.split(" ")]
+    return [get_card(s) for s in cards.split(" ")]
