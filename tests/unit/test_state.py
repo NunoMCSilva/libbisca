@@ -1,6 +1,6 @@
 import pytest
 
-from libbisca.card import Card
+from libbisca.card import Card  # TODO: check why PyCharm has this as unused statement?
 from libbisca.state import *
 
 # using Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior] unittest naming
@@ -8,7 +8,7 @@ from libbisca.state import *
 
 class TestStateBisca3:
 
-    @pytest.mark.parametrize("eldest", list(Player))
+    @pytest.mark.parametrize("eldest", list(Player))    # TODO: check this PyCharm warning
     def test__init__eldest_player_is_given__initializes_correctly(self, mocker, eldest):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
