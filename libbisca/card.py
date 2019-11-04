@@ -77,7 +77,7 @@ class Card:
 
     @staticmethod
     def get_card(card_str: str) -> "Card":
-        # mostly for testing
+        # factory method -- mostly for testing
         rank_str, suit_str = card_str
 
         rank = Card._RANK_STR_TO_RANK[rank_str]
