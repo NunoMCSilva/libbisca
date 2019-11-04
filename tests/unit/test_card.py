@@ -6,11 +6,13 @@ from libbisca.card import *
 
 
 class TestCard:
-    DECK = [Card.get_card(s) for s in
-            "AH 2H 3H 4H 5H 6H 7H QH JH KH " \
-            "AD 2D 3D 4D 5D 6D 7D QD JD KD " \
-            "AS 2S 3S 4S 5S 6S 7S QS JS KS " \
-            "AC 2C 3C 4C 5C 6C 7C QC JC KC".split(" ")]
+    DECK = [
+        Card.get_card(s)
+        for s in "AH 2H 3H 4H 5H 6H 7H QH JH KH "
+        "AD 2D 3D 4D 5D 6D 7D QD JD KD "
+        "AS 2S 3S 4S 5S 6S 7S QS JS KS "
+        "AC 2C 3C 4C 5C 6C 7C QC JC KC".split(" ")
+    ]
 
     @pytest.mark.parametrize("cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C"])
     def test__lt__two_cards__returns_expected(self, cards):
@@ -58,4 +60,9 @@ class TestCard:
 
         # act & assert
         assert deck != TestCard.DECK
-        assert set(deck) == set(TestCard.DECK)   # sorted is uncertain here - unimportant for now
+        assert set(deck) == set(
+            TestCard.DECK
+        )  # sorted is uncertain here - unimportant for now
+
+
+# TODO: add test for get_cards
