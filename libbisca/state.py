@@ -9,9 +9,9 @@ Exports the following classes:
     * State - a snapshot of the current game state
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 # TODO: see issue with relative import
 from libbisca.card import Card, Deck
@@ -29,7 +29,6 @@ class Player(Enum):
 
 
 class State(ABC):
-
     def __init__(self, hand_size: int, eldest: Player = Player.SOUTH):
         # WARNING: this is still experimental
         self.hand_size = hand_size
@@ -54,9 +53,64 @@ class State(ABC):
         for player in (self.turn, self.turn.opponent):
             self.hands[player].append(self.stock.pop())
 
+    @abstractmethod
+    def play(self, move: Card) -> Optional[Tuple[Player, int, List[Card]]]:
+        # basic take from hand and put in table
 
-class StateRuleSet1(State):     # TODO: yeah, needs a better name
-    pass
+        self.hands[self.turn].remove(move)
+        self._cards_in_stock_and_hands -= 1
+
+        # self.table could hold both, but that would allow the outside to glimpse implementation details
+        self.table.append(move)
+        self._table_played.append(self.turn)
+
+        return None
+
+
+class StateRuleSet1(State):  # TODO: yeah, needs a better name
+
+    # TODO: untested... (needs work)
+    def play(self, move: Card) -> Optional[Tuple[Player, int, List[Card]]]:
+        super().play(move)
+
+        # TODO: recheck game rules
+
+        # TODO: this part could be put in State -->
+        self.hands[self.turn].remove(move)
+        self._cards_in_stock_and_hands -= 1
+
+        # self.table could hold both, but that would allow the outside to glimpse implementation details
+        self.table.append(move)
+        self._table_played.append(self.turn)
+        # <-- TODO: this part could be put in State
+
+        # after play
+        if len(self.table) == 1:
+            # eldest played
+            self.turn = self.turn.opponent
+            return None
+        else:
+            # youngest played
+            winner = self._get_round_winner()
+
+            added_score = sum(card.score for card in self.table)
+            self.scores[winner] += added_score
+
+            self.turn = winner
+
+            table = self.table
+            self.table = []
+            self._table_played = []
+
+            if self.stock:
+                self._deal()
+
+            # TODO: is all of this needed?
+            return (
+                winner,
+                added_score,
+                table,
+            )  # dealt_cards   # just return eldest_card, youngest_card
 
 
 def get_state(variant_name: str = "Bisca3", eldest: Player = Player.SOUTH) -> State:
