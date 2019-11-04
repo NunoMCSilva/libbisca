@@ -90,8 +90,18 @@ class Card:
         # WARNING: experimental -->
         # not shuffled deck is ordered by sort order not original deck order
         # considered not an issues, since unshuffle is only for tests
-        ranks_ = [Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX, Rank.SEVEN, Rank.QUEEN, Rank.JACK,
-                  Rank.KING]
+        ranks_ = [
+            Rank.ACE,
+            Rank.TWO,
+            Rank.THREE,
+            Rank.FOUR,
+            Rank.FIVE,
+            Rank.SIX,
+            Rank.SEVEN,
+            Rank.QUEEN,
+            Rank.JACK,
+            Rank.KING,
+        ]
         deck = [Card(rank, suit) for suit in Suit for rank in ranks_]
 
         if shuffle:
@@ -101,3 +111,9 @@ class Card:
 
         return typing.cast(Deck, deck)  # typing hint, does nothing to code
         # WARNING: experimental <--
+
+
+def get_cards(cards: str) -> List[Card]:
+    # helper function, useful for testing
+    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
+    return [Card.get_card(s) for s in cards.split(" ")]
