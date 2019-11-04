@@ -13,16 +13,18 @@ class TestStateBisca3:
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
 
-        stock = "2H 3H 4H 5H 6H QH JH KH 7H AH 2D 3D 4D 5D 6D QD JD KD 7D AD 2S 3S 4S 5S 6S QS JS KS 7S AS " \
-                "2C 3C 4C 5C"
+        stock = "AH 2H 3H 4H 5H 6H 7H QH JH KH " \
+                "AD 2D 3D 4D 5D 6D 7D QD JD KD " \
+                "AS 2S 3S 4S 5S 6S 7S QS JS KS " \
+                "AC 2C 3C 4C"
         expected_stock = [Card.get_card(s) for s in stock.split(" ")]
 
-        expected_trump = Card.get_card("2H")
+        expected_trump = Card.get_card("AH")
 
-        eldest_hand = "AC KC QC"
+        eldest_hand = "KC QC 6C"
         expected_eldest_hand = [Card.get_card(s) for s in eldest_hand.split(" ")]
 
-        youngest_hand = "7C JC 6C"
+        youngest_hand = "JC 7C 5C"
         expected_youngest_hand = [Card.get_card(s) for s in youngest_hand.split(" ")]
 
         # act
