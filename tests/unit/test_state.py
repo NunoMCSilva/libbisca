@@ -1,243 +1,43 @@
 import pytest
 
-from libbisca.card import get_card
+from libbisca.card import Card
 from libbisca.state import *
 
 # using Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior] unittest naming
 
 
-class TestStateVariant1:
-    @pytest.mark.parametrize("eldest", list(Player))  # TODO: check this PyCharm warning
-    def test__init__first_eldest_player_is_given__initializes_correctly(
-        self, mocker, eldest
-    ):
-        # arrange
-        mocker.patch("random.SystemRandom.shuffle")
-
-        expected_stock = (
-            "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-            "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣, 3♣, 4♣]"
-        )
-
-        # act
-        state = StateVariant1(eldest=eldest)
-
-        # assert
-        assert str(state.stock) == expected_stock
-        assert state.turn == eldest
-        assert repr(state.trump) == "A♡"
-        assert repr(state.hands[eldest]) == "[K♣, Q♣, 6♣]"
-        assert repr(state.hands[eldest.opponent]) == "[J♣, 7♣, 5♣]"
-        assert state.score == 0
-        assert state.table == []
-
-    @pytest.mark.parametrize("eldest", list(Player))  # TODO: check this PyCharm warning
-    def test__play__first_round_with_eldest_to_play__runs_correctly(
-        self, mocker, eldest
-    ):
-        # play is a command method, check changes to state
-
-        # arrange
-        mocker.patch("random.SystemRandom.shuffle")
-
-        youngest = eldest.opponent
-        expected_stock = (
-            "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-            "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣, 3♣, 4♣]"
-        )
-
-        state = State(eldest=eldest)
-        move = get_card("KC")
-
-        # act
-        result = state.play(move)
-
-        # assert
-        assert result is None
-
-        assert str(state.stock) == expected_stock
-        assert state.turn == youngest
-        assert str(state.trump) == "A♡"
-        assert str(state.hands[eldest]) == "[Q♣, 6♣]"
-        assert str(state.hands[youngest]) == "[J♣, 7♣, 5♣]"
-        assert state.table == [move]
-
-        assert state.winner == Winner.DRAW
-        assert state.score == 0
+class TestStateBisca3:
 
     @pytest.mark.parametrize("eldest", list(Player))
-    def test__play__first_round_with_eldest_to_play__runs_correctly(
-        self, mocker, eldest
-    ):
-        # play is a command method, check changes to state
-
-        mocker.patch("random.SystemRandom.shuffle")
-
-        youngest = eldest.opponent
-        expected_stock = (
-            "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-            "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣]"
-        )
-
-        state = StateVariant1(eldest=eldest)
-
-        state.play(get_card("KC"))
-        move = get_card("7C")  # KC < 7C, youngest (eldest.opponent) must win
-
-        # act
-        winner, added_score, table = state.play(move)
-
-        # assert
-        assert winner == youngest
-        assert added_score == 14
-        assert str(table) == "[K♣, 7♣]"
-
-        assert str(state.stock) == expected_stock
-        assert state.turn == youngest
-        assert str(state.trump) == "A♡"
-        assert str(state.hands[eldest]) == "[Q♣, 6♣, 3♣]"
-        assert str(state.hands[youngest]) == "[J♣, 5♣, 4♣]"
-        assert state.table == []
-
-        assert state.winner == Winner(youngest)
-        assert (
-            state.score == 14
-        )  # next test confirms it's a add (hmm, getting paranoid again)
-
-    def test__play__after_first_four_moves__runs_correctly(self, mocker):
-        # play is a command method, check changes to state
-
+    def test__init__eldest_player_is_given__initializes_correctly(self, mocker, eldest):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
 
-        expected_stock = (
-            "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-            "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠]"
-        )
+        stock = "2H 3H 4H 5H 6H QH JH KH 7H AH 2D 3D 4D 5D 6D QD JD KD 7D AD 2S 3S 4S 5S 6S QS JS KS 7S AS " \
+                "2C 3C 4C 5C"
+        expected_stock = [Card.get_card(s) for s in stock.split(" ")]
 
-        state = StateVariant1(eldest=Player.SOUTH)
+        expected_trump = Card.get_card("2H")
+
+        eldest_hand = "AC KC QC"
+        expected_eldest_hand = [Card.get_card(s) for s in eldest_hand.split(" ")]
+
+        youngest_hand = "7C JC 6C"
+        expected_youngest_hand = [Card.get_card(s) for s in youngest_hand.split(" ")]
 
         # act
-        result = None
-        for move in "KC, 7C, JC, QC".split(", "):
-            result = state.play(get_card(move))
+        state = get_state("Bisca3", eldest)
 
         # assert
-        winner, added_score, table = result
+        assert state.hand_size == 3
+        assert state.turn == eldest
 
-        assert winner == Player.NORTH
-        assert added_score == 5
-        assert str(table) == "[J♣, Q♣]"
+        assert state.stock == expected_stock
+        assert state.trump == expected_trump
 
-        assert str(state.stock) == expected_stock
-        assert state.turn == Player.NORTH
-        assert str(state.trump) == "A♡"
-        assert str(state.hands[Player.SOUTH]) == "[6♣, 3♣, A♣]"
-        assert str(state.hands[Player.NORTH]) == "[5♣, 4♣, 2♣]"
+        assert state.hands[eldest] == expected_eldest_hand
+        assert state.hands[eldest.opponent] == expected_youngest_hand
+
+        assert state.scores == {Player.NORTH: 0, Player.SOUTH: 0}
+
         assert state.table == []
-
-        assert state.winner == Winner.NORTH
-        assert state.score == 19
-
-    def test__is_endgame__initial_state__return_false(self):
-        # method is query method, check output
-
-        # arrange
-        state = StateVariant1()
-
-        # act & assert
-        assert state.is_endgame() is False
-
-    def test__is_endgame__terminal_state__return_false(self):
-        # arrange
-        state = StateVariant1()
-        state._cards_in_stock_and_hands = 0
-
-        # act & assert
-        assert state.is_endgame() is True
-
-    @pytest.mark.parametrize(
-        "table, did_eldest_win",
-        [
-            # tests overlap a bit with card.__gt__ tests
-            # same suit (follow)
-            ("4H, 5H", False),  # 4H < 5H -> youngest
-            ("7H, 5H", True),  # 7H > 5H -> eldest
-            # same suit (follow) - trumps
-            ("4H(t), 5H", True),  # 4H(t) > 5H -> eldest
-            ("4H, 5H(t)", False),  # 4H < 5H(t) -> youngest
-            ("4H(t), 5H(t)", False),  # 4H(t) < 5H(t) -> youngest
-            # different suit (no follow)
-            ("6H, 5C", True),  # 6H > 5C, no follow -> eldest
-            ("4H, 5C", True),  # 4H < 5C, no follow -> eldest
-            # different suit (no follow) - trumps
-            ("4H(t), 5C", True),  # 4H(t) > 5C, no follow -> eldest
-            ("4H, 5C(t)", False),  # 4H < 5C(t), no follow -> youngest
-        ],
-    )
-    def test__get_round_winner__x__get_expected_player(self, table, did_eldest_win):
-        # only do tests for private methods if they are complex, otherwise just the public api
-
-        # arrange
-        state = StateVariant1()
-
-        eldest = state.turn
-        state.table = [get_card(c) for c in table.split(", ")]
-        state._table_played = [eldest, eldest.opponent]
-
-        # act
-        winner = state._get_round_winner()
-
-        # assert
-        assert winner == eldest if did_eldest_win else eldest.opponent
-
-    def test__state_winner__initial_state__return_zero(self):
-        # arrange
-        state = StateVariant1()
-
-        # act & assert
-        assert state.winner == 0
-
-    @pytest.mark.parametrize(
-        "south_score, north_score, expected_winner",
-        [
-            (120, 0, Winner.SOUTH),
-            (90, 30, Winner.SOUTH),
-            (60, 60, Winner.DRAW),
-            (30, 90, Winner.NORTH),
-            (0, 120, Winner.NORTH),
-        ],
-    )
-    def test__state_winner__final_state__return_expected_nit(
-        self, south_score, north_score, expected_winner
-    ):
-        # arrange
-        state = StateVariant1()
-        state._cards_in_stock_and_hands = 0
-        state._scores[Player.SOUTH] = south_score
-        state._scores[Player.NORTH] = north_score
-
-        # act & assert
-        assert state.winner == expected_winner
-
-    @pytest.mark.parametrize(
-        "south_score, north_score, expected_score",
-        [
-            (120, 0, 120),
-            (90, 30, 90),
-            (60, 60, 60),
-            (30, 90, 90),
-            (0, 120, 120),
-        ],
-    )
-    def test__state_winner__final_state__return_expected_int(
-        self, south_score, north_score, expected_score
-    ):
-        # arrange
-        state = StateVariant1()
-        state._cards_in_stock_and_hands = 0
-        state._scores[Player.SOUTH] = south_score
-        state._scores[Player.NORTH] = north_score
-
-        # act & assert
-        assert state.score == expected_score
