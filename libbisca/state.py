@@ -1,4 +1,13 @@
-# TODO: add docstrings
+"""Bisca State
+
+Implements the rules for a single Bisca variant.
+
+Exports the following classes:
+# TODO: needs refactoring, check how to handle Hand and correct
+    * Player - enum representing the two players (North and South)
+    * Winner - enum representing endgame results (North win, South win and Draw)
+    * State - a snapshot of the current game state
+"""
 
 from abc import ABC
 from enum import Enum
