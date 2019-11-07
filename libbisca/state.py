@@ -1,12 +1,16 @@
 """Bisca State
 
-Implements the rules for a single Bisca variant.
+Implements the rules for Bisca.
 
-Exports the following classes:
-# TODO: needs refactoring, check how to handle Hand and correct
-    * Player - enum representing the two players (North and South)
-    * Winner - enum representing endgame results (North win, South win and Draw)
-    * State - a snapshot of the current game state
+This module exports the following classes:
+    * Player - enum representing all players: North, South
+    * Winner - enum representing all winners: North, South, Draw
+    * Variant - enum representing currently implemented variants
+    * State - abstract State class (snapshot of current game state)
+    * StateRuleSet1 - concrete subclass of State implementing a specific variant (TODO: needs better name)
+
+This module exports the following functions:
+    * get_state - factory function, returns an initialized subclass of State
 """
 
 from abc import ABC, abstractmethod
@@ -20,6 +24,8 @@ Hand = List[Card]
 
 
 class Player(Enum):
+    # TODO: add docstring
+
     NORTH = -1
     SOUTH = 1
 
@@ -28,13 +34,22 @@ class Player(Enum):
         return Player.NORTH if self == Player.SOUTH else Player.SOUTH
 
 
+class Winner(Enum):
+    NORTH = -1
+    DRAW = 0
+    SOUTH = 1
+
+
+# TODO: explain Variant can have multiple sub-variants (same ruleset, 3cards, 9cards, etc.) -- research this
+Variant = Enum("Variant", "BISCA3")  # BISCA7 BISCA9")   TODO: check PyCharm variant
+
+
 class State(ABC):
     def __init__(self, hand_size: int, eldest: Player = Player.SOUTH):
-        # WARNING: this is still experimental
         self.hand_size = hand_size
         self.turn: Player = eldest
 
-        self.stock: Deck = Card.get_deck()
+        self.stock: Deck = Deck()
         self.trump: Card = self.stock[0]
 
         self._cards_in_stock_and_hands = len(self.stock)
@@ -42,8 +57,9 @@ class State(ABC):
         self.hands: Dict[Player, Hand] = {player: [] for player in Player}
         self.scores: Dict[Player, int] = {player: 0 for player in Player}
 
+        # self.table could hold both, but that would allow the outside to glimpse implementation details
         self.table: List[Card] = []
-        self._table_played = []
+        self._table_played: List[Player] = []
 
         # deal cards to players
         for _ in range(self.hand_size):
@@ -54,67 +70,36 @@ class State(ABC):
             self.hands[player].append(self.stock.pop())
 
     @abstractmethod
-    def play(self, move: Card) -> Optional[Tuple[Player, int, List[Card]]]:
-        # basic take from hand and put in table
+    def play(self, move: Card) -> None:
+        # basic "take from hand and put in table"
 
         self.hands[self.turn].remove(move)
         self._cards_in_stock_and_hands -= 1
 
-        # self.table could hold both, but that would allow the outside to glimpse implementation details
         self.table.append(move)
         self._table_played.append(self.turn)
 
-        return None
+    # TODO: add do_rollout (useful for some game engines)
 
 
-class StateRuleSet1(State):  # TODO: yeah, needs a better name
+class StateRuleSet1(State):
+    # TODO: yeah, needs a better name
+    # TODO: recheck game rules
 
-    # TODO: untested... (needs work)
-    def play(self, move: Card) -> Optional[Tuple[Player, int, List[Card]]]:
+    def play(self, move: Card) -> Optional[None]:  # add Tuple
         super().play(move)
 
-        # TODO: recheck game rules
-
-        # TODO: this part could be put in State -->
-        self.hands[self.turn].remove(move)
-        self._cards_in_stock_and_hands -= 1
-
-        # self.table could hold both, but that would allow the outside to glimpse implementation details
-        self.table.append(move)
-        self._table_played.append(self.turn)
-        # <-- TODO: this part could be put in State
-
         # after play
-        if len(self.table) == 1:
-            # eldest played
-            self.turn = self.turn.opponent
-            return None
+        if len(self.table) == 1:  # eldest played
+            raise NotImplementedError
         else:
-            # youngest played
-            winner = self._get_round_winner()
-
-            added_score = sum(card.score for card in self.table)
-            self.scores[winner] += added_score
-
-            self.turn = winner
-
-            table = self.table
-            self.table = []
-            self._table_played = []
-
-            if self.stock:
-                self._deal()
-
-            # TODO: is all of this needed?
-            return (
-                winner,
-                added_score,
-                table,
-            )  # dealt_cards   # just return eldest_card, youngest_card
+            raise NotImplementedError
 
 
-def get_state(variant_name: str = "Bisca3", eldest: Player = Player.SOUTH) -> State:
-    if variant_name == "Bisca3":
+def get_state(
+    variant_name: Variant = Variant.BISCA3, eldest: Player = Player.SOUTH
+) -> State:
+    if variant_name == Variant.BISCA3:
         return StateRuleSet1(hand_size=3, eldest=eldest)
     else:
         raise NotImplementedError
