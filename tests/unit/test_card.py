@@ -13,7 +13,7 @@ class TestCard:
         # arrange
         c1, op, c2 = cards.split(" ")
         c1, c2 = get_cards(cards.replace(op, "").replace("  ", " "))
-        expected = (op == ">")
+        expected = op == ">"
 
         # act & Assert
         assert (c1 > c2) is expected
@@ -63,7 +63,6 @@ class TestDeck:
 
 
 class TestGetCard:
-
     def test__any_card_str__returns_expected(self):
         # arrange
         card = Card(Rank.QUEEN, Suit.SPADES)
