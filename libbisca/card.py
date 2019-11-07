@@ -41,7 +41,7 @@ class Suit(Enum):
     CLUBS = "C"
 
 
-@dataclass(unsafe_hash=True)    # WARNING: for now, this is only useful for testing
+@dataclass(unsafe_hash=True)  # WARNING: for now, this is only useful for testing
 class Card:
     # TODO: add docstrings
 
