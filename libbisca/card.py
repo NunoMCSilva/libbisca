@@ -1,31 +1,23 @@
 """Card
 
 Implements Bisca card related classes.
-# TODO: improve docstrings
+
 This module exports the following classes:
     * Rank - enum representing all ranks supported by Bisca cards: 23456QJK7A
     * Suit - enum representing all suits: Hearts, Diamonds, Spades, Clubs
     * Card - Bisca Card
-    * Deck -- TODO: add
+    * Deck - list of Cards (subclass of list) initializing with a full deck
 
 This module exports the following functions:
-    * get_card -- TODO: add
-    * get_cards -- TODO: add
+    * get_card -- Card factory function
+    * get_cards -- factory function for list of Cards (not Deck)
 """
+# TODO: improve docstrings
 
 from dataclasses import dataclass
 from enum import Enum
 from random import SystemRandom
 from typing import List
-
-
-# WARNING: experimental -->
-import typing
-
-# from typing import NewType# TODO: check how to document new type Deck
-
-# Deck = NewType("Deck", List["Card"])
-# WARNING: <-- experimental
 
 
 class Rank(Enum):
@@ -49,7 +41,7 @@ class Suit(Enum):
     CLUBS = "C"
 
 
-@dataclass(unsafe_hash=True)  # for now, this is only useful for testing
+@dataclass(unsafe_hash=True)    # WARNING: for now, this is only useful for testing
 class Card:
     # TODO: add docstrings
 
@@ -110,13 +102,16 @@ class Deck(list):
         # WARNING: experimental <--
 
     def shuffle(self) -> None:
-        # WARNING: experimental <--
+        # WARNING: experimental -->
         # SystemRandom is necessary to generate all of the 40! possibilities
         SystemRandom().shuffle(self)
         # possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
+        # WARNING: experimental <--
 
 
 def get_card(card_str: str) -> Card:
+    # TODO: add docstrings
+    # TODO: might need some refactoring
     # factory method -- mostly for testing
     rank_str, suit_str = card_str
 
