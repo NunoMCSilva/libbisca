@@ -9,15 +9,14 @@ This module exports the following classes:
     * Deck - list of Cards (subclass of list) initializing with a full deck
 
 This module exports the following functions:
-    * get_card -- Card factory function
-    * get_cards -- factory function for list of Cards (not Deck)
+    * get_cards -- helper factory function: returns Card or List[Card]
 """
 # TODO: improve docstrings
 
 from dataclasses import dataclass
 from enum import Enum
 from random import SystemRandom
-from typing import List
+from typing import List, Union
 
 
 class Rank(Enum):
@@ -109,19 +108,24 @@ class Deck(list):
         # WARNING: experimental <--
 
 
-def get_card(card_str: str) -> Card:
-    # TODO: add docstrings
+def get_cards(cards: str) -> Union[Card, List[Card]]:
+    # helper function, useful for testing
     # TODO: might need some refactoring
-    # factory method -- mostly for testing
-    rank_str, suit_str = card_str
+    # TODO: add docstrings: receives "2H" and returns Card(2H)
+    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
+
+    card_lst = cards.split(" ")
+    if len(card_lst) == 1:
+        return _get_card(card_lst[0])
+    else:
+        return [_get_card(s) for s in card_lst]
+
+
+def _get_card(card: str) -> Card:
+    # TODO: might need some refactoring
+    rank_str, suit_str = card
 
     rank = Card._RANK_STR_TO_RANK[rank_str]
     suit = Card._SUIT_STR_TO_SUIT[suit_str]
 
     return Card(rank, suit)
-
-
-def get_cards(cards: str) -> List[Card]:
-    # helper function, useful for testing
-    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
-    return [get_card(s) for s in cards.split(" ")]
