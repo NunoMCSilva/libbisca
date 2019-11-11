@@ -23,7 +23,7 @@ class TestCard:
         # mostly for my peace of mind
 
         # arrange
-        card = get_card(card_str)
+        card = get_cards(card_str)
 
         # act & assert
         assert isinstance(card, Card)  # again, peace of mind
@@ -34,7 +34,7 @@ class TestCard:
     )
     def test__score__any_card__returns_expected(self, card_str, score):
         # arrange
-        card = get_card(card_str)
+        card = get_cards(card_str)
 
         # act & assert
         assert card.score == score
@@ -69,7 +69,7 @@ class TestGetCard:
         card_str = "QS"
 
         # act & assert
-        assert get_card(card_str) == card
+        assert get_cards(card_str) == card
 
     def test__any_cards_str__returns_expected(self):
         # arrange
