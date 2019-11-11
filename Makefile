@@ -13,6 +13,9 @@ black:
 unit:
 	$(PER) pytest --cov=$(PROJ) --mypy tests/unit
 
+mypy:
+	$(PER) mypy -p $(PROJ)
+
 
 # PyPI
 build:
