@@ -20,3 +20,9 @@
 ## maybe TODO
 ### libbisca/card.py
 - maybe add a pprint option to deck
+
+### tests/unit/test_state.py
+- TestDeck.DECK - just put this in a separate module/fixture accessible to both test_state and test_card?
+- add cards in table count? and table_played? those are internal implementation details...
+- while the load fixtures part are very interesting, I'm having some issues implementing them... hmmm - start with load_json_state? that might make testing easier
+
