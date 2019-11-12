@@ -116,11 +116,15 @@ def get_cards(cards: str) -> Union[Card, List[Card]]:
     # TODO: add docstrings: receives "2H" and returns Card(2H)
     # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
 
-    card_lst = cards.split(" ")
-    if len(card_lst) == 1:
-        return _get_card(card_lst[0])
+    if cards == "":
+        return []
     else:
-        return [_get_card(s) for s in card_lst]
+        card_lst = cards.split(" ")
+
+        if len(card_lst) == 1:
+            return _get_card(card_lst[0])
+        else:
+            return [_get_card(s) for s in card_lst]
 
 
 def _get_card(card: str) -> Card:
