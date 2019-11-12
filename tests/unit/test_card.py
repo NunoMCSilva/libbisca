@@ -8,7 +8,9 @@ from libbisca.card import *
 
 
 class TestCard:
-    @pytest.mark.parametrize("cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C"])
+    @pytest.mark.parametrize(
+        "cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C", "JC > QC"]
+    )
     def test__gt__two_cards__returns_expected(self, cards):
         # arrange
         c1, op, c2 = cards.split(" ")
@@ -67,16 +69,20 @@ class TestGetCard:
 
 
 class TestGetCards:
-    @pytest.mark.parametrize("card_str, cards", [
-        ("", []),
-        ("QS", [
-            Card(Rank.QUEEN, Suit.SPADES)
-        ]),
-        ("QS KH 7C", [
-            Card(Rank.QUEEN, Suit.SPADES),
-            Card(Rank.KING, Suit.HEARTS),
-            Card(Rank.SEVEN, Suit.CLUBS),
-        ]),
-    ])
+    @pytest.mark.parametrize(
+        "card_str, cards",
+        [
+            ("", []),
+            ("QS", [Card(Rank.QUEEN, Suit.SPADES)]),
+            (
+                "QS KH 7C",
+                [
+                    Card(Rank.QUEEN, Suit.SPADES),
+                    Card(Rank.KING, Suit.HEARTS),
+                    Card(Rank.SEVEN, Suit.CLUBS),
+                ],
+            ),
+        ],
+    )
     def test__any_card_str__returns_expected(self, card_str, cards):
         assert get_cards(card_str) == cards
