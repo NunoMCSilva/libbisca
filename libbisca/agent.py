@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Bisca Agent
 
 This module exports the following classes:

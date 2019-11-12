@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Card
 
 Implements Bisca card related classes.
