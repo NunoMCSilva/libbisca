@@ -84,7 +84,7 @@ class State(ABC):
     # TODO: save to json
 
     def is_endgame(self) -> bool:
-        raise NotImplementedError
+        return len(self.stock) + len(self.hands[Player.NORTH]) + len(self.hands[Player.SOUTH]) == 0
 
     @property
     @abstractmethod
@@ -107,17 +107,17 @@ class State(ABC):
 
     # TODO: need to rework this
     def do_random_move(self):  # TODO: check ret (play ret + move)
-        # WARNING: ok, this is experimental
+        # WARNING: ok, this is experimental -- TEST
         move = random.choice(self.legal_moves)
-        self.play(move)
-        # return move, result
+        result = self.play(move)
+        return move, result
 
     # TODO: need to rework this -- this is random rollout, there are others...
     def do_random_rollout(
         self
     ):  # , move: Card):     # -> None:  / do_rollout -- add Agents?
         # WARNING: experimental ->
-        if not self.is_endgame():
+        while not self.is_endgame():
             # move, _ = self.do_random_move()
             self.do_random_move()
         # TODO: return results
@@ -231,7 +231,7 @@ class StateTwoPlayersStandardRules(State):
 
         # follow is not mandatory, but if youngest plays a different suit than is not trump, eldest wins
         if card1.suit != card2.suit:
-            if card2.is_trump():
+            if card2.suit == self.trump.suit:   ##if card2.is_trump():
                 return youngest
             return eldest
 
@@ -246,9 +246,6 @@ class StateTwoPlayersStandardRules(State):
         return self.hands[self.turn]
 
     def get_winner(self) -> Winner:
-        pass
-
-    def is_endgame(self) -> bool:
         pass
 
 
