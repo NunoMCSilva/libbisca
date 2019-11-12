@@ -41,25 +41,20 @@ class TestCard:
 
 
 class TestDeck:
-    DECK_STR = (
-        "AH 2H 3H 4H 5H 6H 7H QH JH KH AD 2D 3D 4D 5D 6D 7D QD JD KD "
-        "AS 2S 3S 4S 5S 6S 7S QS JS KS AC 2C 3C 4C 5C 6C 7C QC JC KC"
-    )
-    DECK = get_cards(DECK_STR)  # list
 
-    def test__init__not_shuffled__returns_expected(self):
+    def test__init__not_shuffled__returns_expected(self, deck):
         # act & assert
-        assert Deck(shuffle=False) == TestDeck.DECK
+        assert Deck(shuffle=False) == deck
 
-    def test__init__shuffled__returns_expected(self):
+    def test__init__shuffled__returns_expected(self, deck):
         # act
-        deck = Deck()
+        shuffled_deck = Deck()
 
         # act & assert
-        assert deck != TestDeck.DECK
+        assert shuffled_deck != deck
         # I'd prefer sorted but result is unpredictable (ranks correct, suit random) - no point in worrying about this
-        assert set(deck) == set(TestDeck.DECK)
-        assert len(set(deck)) == len(deck)  # ok, now this is just paranoia
+        assert set(shuffled_deck) == set(deck)
+        assert len(set(shuffled_deck)) == len(deck)  # ok, now this is just paranoia
 
 
 class TestGetCard:
