@@ -4,17 +4,8 @@
   "turn": "North",
   "stock": "AH 2H 3H 4H 5H 6H 7H QH JH KH AD 2D 3D 4D 5D 6D 7D QD JD KD AS 2S 3S 4S 5S 6S 7S QS JS KS AC 2C",
   "trump": "AH",
-  "hands": {
-    "North": "JC 5C 4C",
-    "South": "KC QC 3C"
-  },
-  "piles": {
-    "North": ["6C 7C"],
-    "South": []
-  },
-  "scores": {
-    "North": 10,
-    "South": 0
-  },
+  "hands": ["JC 7C 4C", "KC QC 3c"],
+  "piles": [["6C 7C"], []],
+  "scores": [10, 0],
   "table": ""
 }
