@@ -12,6 +12,7 @@ pytest-mypy = ">=0.4.1"
 pytest-cov = ">=2.8.1"
 hypothesis = ">=4.42.3"
 twine = ">=2.0.0"
+pylint = ">=2.4.3"
 
 [packages]
 
