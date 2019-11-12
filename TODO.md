@@ -27,6 +27,11 @@
 ### libbisca/card.py
 - maybe add a pprint option to deck
 
+### libbisca/state.py
+- self.table could hold both, but that would allow the outside to glimpse implementation details
+- self._cards_in_stock_and_hands = len(self.stock) + etc...
+- self._table_played: List[Player] = []   # TODO: doesn't really seem necessary, except for speed?
+
 ### tests/unit/test_agent.py
 - test RandomAgent.get_move
 
@@ -40,7 +45,6 @@
 - add test: is_endgame
 - add test: legal_moves
 - add test: get_winner
-- add test: play
 - add test: do_random_move
 - add test: do_random_rollout
 - add test: get_state
