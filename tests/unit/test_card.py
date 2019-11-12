@@ -23,7 +23,7 @@ class TestCard:
         # mostly for my peace of mind
 
         # arrange
-        card = get_cards(card_str)
+        card = get_card(card_str)
 
         # act & assert
         assert isinstance(card, Card)  # again, peace of mind
@@ -34,7 +34,7 @@ class TestCard:
     )
     def test__score__any_card__returns_expected(self, card_str, score):
         # arrange
-        card = get_cards(card_str)
+        card = get_card(card_str)
 
         # act & assert
         assert card.score == score
@@ -57,26 +57,26 @@ class TestDeck:
 
 
 class TestGetCard:
-    def test__empty_str__returns_expected(self):
-        # arrange, act & assert
-        assert get_cards("") == []
-
-    def test__any_card_str__returns_expected(self):
+    def test__any_card__str__returns_expected(self):
         # arrange
         card = Card(Rank.QUEEN, Suit.SPADES)
         card_str = "QS"
 
         # act & assert
-        assert get_cards(card_str) == card
+        assert get_card(card_str) == card
 
-    def test__any_cards_str__returns_expected(self):
-        # arrange
-        cards = [
+
+class TestGetCards:
+    @pytest.mark.parametrize("card_str, cards", [
+        ("", []),
+        ("QS", [
+            Card(Rank.QUEEN, Suit.SPADES)
+        ]),
+        ("QS KH 7C", [
             Card(Rank.QUEEN, Suit.SPADES),
             Card(Rank.KING, Suit.HEARTS),
             Card(Rank.SEVEN, Suit.CLUBS),
-        ]
-        cards_str = "QS KH 7C"
-
-        # act & assert
-        assert get_cards(cards_str) == cards
+        ]),
+    ])
+    def test__any_card_str__returns_expected(self, card_str, cards):
+        assert get_cards(card_str) == cards

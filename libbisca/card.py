@@ -11,7 +11,8 @@ This module exports the following classes:
     * Deck - list of Cards (subclass of list) initializing with a full deck
 
 This module exports the following functions:
-    * get_cards -- helper factory function: returns Card or List[Card]
+    * get_card -- helper factory function: returns Card
+    * get_cards -- helper factory function: returns List[Card]
 """
 # TODO: improve docstrings
 
@@ -110,24 +111,9 @@ class Deck(list):
         # WARNING: experimental <--
 
 
-def get_cards(cards: str) -> Union[Card, List[Card]]:
-    # helper function, useful for testing
-    # TODO: might need some refactoring
-    # TODO: add docstrings: receives "2H" and returns Card(2H)
-    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
-
-    if cards == "":
-        return []
-    else:
-        card_lst = cards.split(" ")
-
-        if len(card_lst) == 1:
-            return _get_card(card_lst[0])
-        else:
-            return [_get_card(s) for s in card_lst]
-
-
-def _get_card(card: str) -> Card:
+# TODO: put these two in Card class?
+# TODO: optimization to access "singleton" cards?
+def get_card(card: str) -> Card:
     # TODO: might need some refactoring
     rank_str, suit_str = card
 
@@ -135,3 +121,12 @@ def _get_card(card: str) -> Card:
     suit = Card._SUIT_STR_TO_SUIT[suit_str]
 
     return Card(rank, suit)
+
+
+def get_cards(cards: str) -> List[Card]:
+    # helper function, useful for testing
+    # TODO: might need some refactoring
+    # TODO: add docstrings: receives "2H" and returns [Card(2H)]
+    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
+
+    return [] if cards == "" else [get_card(s) for s in cards.split(" ")]
