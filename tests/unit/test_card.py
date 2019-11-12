@@ -41,7 +41,6 @@ class TestCard:
 
 
 class TestDeck:
-
     def test__init__not_shuffled__returns_expected(self, deck):
         # act & assert
         assert Deck(shuffle=False) == deck
@@ -58,6 +57,10 @@ class TestDeck:
 
 
 class TestGetCard:
+    def test__empty_str__returns_expected(self):
+        # arrange, act & assert
+        assert get_cards("") == []
+
     def test__any_card_str__returns_expected(self):
         # arrange
         card = Card(Rank.QUEEN, Suit.SPADES)
