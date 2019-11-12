@@ -86,8 +86,8 @@ class State(ABC):
     def is_endgame(self) -> bool:
         raise NotImplementedError
 
-    @abstractmethod
     @property
+    @abstractmethod
     def legal_moves(self) -> List[Card]:
         raise NotImplementedError
 
