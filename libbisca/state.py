@@ -22,7 +22,6 @@ import json
 import random
 from typing import Dict, List, Optional, Tuple
 
-# TODO: see issue with relative import
 from libbisca.agent import Agent
 from libbisca.card import Card, Deck, get_card, get_cards
 
@@ -50,41 +49,15 @@ class Winner(Enum):
 
 class State(ABC):
     def __init__(self, hand_size: int, eldest: Player = Player.SOUTH, state=None):
+        # TODO: add typing?
         # TODO: add docstring, etc -- state -- for load_state_from_json (None on not load)
 
-        self.hand_size = hand_size
+        self.hand_size: int = hand_size
         self.turn: Player = eldest
 
-        # TODO: separate this into private functions?
-        if state is None:
-            self.stock: Deck = Deck()
-            self.trump: Card = self.stock[0]
+        self.stock = self.trump = self.hands = self.piles = self.scores = self.table = None
 
-            self.hands: Dict[Player, Hand] = {player: [] for player in Player}
-            # TODO: self.piles doesn't seem necessary, but...
-            self.piles: Dict[Player, List[Tuple[Card]]] = {
-                player: [] for player in Player
-            }
-            self.scores: Dict[Player, int] = {player: 0 for player in Player}
-
-            self.table: List[Card] = []
-
-            # deal cards to players
-            for _ in range(self.hand_size):
-                self._deal()
-        else:
-            stock, trump, hands, piles, scores, table = state
-
-            self.stock = stock
-            self.trump = trump
-            self.hands = hands
-            self.piles = piles
-            self.scores = scores
-            self.table = table
-
-        # self.table could hold both, but that would allow the outside to glimpse implementation details
-        # self._cards_in_stock_and_hands = len(self.stock) + etc...
-        # self._table_played: List[Player] = []   # TODO: doesn't really seem necessary, except for speed?
+        self._init_state() if state is None else self._load_state(state)
 
     def __eq__(self, other: "State"):
         return (
@@ -100,7 +73,8 @@ class State(ABC):
 
     def __repr__(self):
         # TODO: need refactoring
-        return f"{self.hand_size} {self.turn} {self.stock} {self.trump} {self.hands} {self.piles} {self.scores} {self.table}"
+        return f"{self.hand_size} {self.turn} {self.stock} {self.trump} {self.hands} {self.piles} {self.scores} " \
+               f"{self.table}"
 
     @staticmethod
     @abstractmethod
@@ -110,8 +84,8 @@ class State(ABC):
     def is_endgame(self) -> bool:
         raise NotImplementedError
 
-    @property
     @abstractmethod
+    @property
     def legal_moves(self) -> List[Card]:
         raise NotImplementedError
 
@@ -146,6 +120,32 @@ class State(ABC):
             self.do_random_move()
         # TODO: return results
 
+    def _init_state(self):
+        self.stock: Deck = Deck()
+        self.trump: Card = self.stock[0]
+
+        self.hands: Dict[Player, Hand] = {player: [] for player in Player}
+
+        # WARNING: self.piles doesn't seem necessary, but...
+        self.piles: Dict[Player, List[Tuple[Card]]] = {player: [] for player in Player}
+        self.scores: Dict[Player, int] = {player: 0 for player in Player}
+
+        self.table: Hand = []
+
+        # deal cards to players
+        for _ in range(self.hand_size):
+            self._deal()
+
+    def _load_state(self, state):
+        stock, trump, hands, piles, scores, table = state
+
+        self.stock = stock
+        self.trump = trump
+        self.hands = hands
+        self.piles = piles
+        self.scores = scores
+        self.table = table
+
     def _deal(self) -> List[Card]:
         dealt = []
         for player in (self.turn, self.turn.opponent):
@@ -155,44 +155,42 @@ class State(ABC):
         # winner, loser
         return dealt
 
+    @staticmethod
+    def _decode_state(dct) -> Tuple[int, Player, Tuple]:   # incomplete typing
+        # WARNING: not sure I like this usage of "super", but...
+        hand_size, turn, stock, trump, hands, piles, scores, table = \
+            [dct[k] for k in "hand_size, turn, stock, trump, hands, piles, scores, table".split(", ")]
+
+        # TODO: check PyCharm warnings
+        turn = Player.NORTH if turn == "North" else Player.SOUTH
+        stock = get_cards(stock)
+        trump = get_card(trump)
+        hands = {p: get_cards(l) for p, l in zip(Player, hands)}
+        piles = {p: [get_cards(s) for s in t] for p, t in zip(Player, piles)}
+        scores = {p: i for p, i in zip(Player, scores)}
+        table = get_cards(table)
+
+        return hand_size, turn, (stock, trump, hands, piles, scores, table)
+
 
 class StateTwoPlayersStandardRules(State):
     # TODO: recheck game rules
     # TODO: may modify to allow more players or just create other class
 
+    # TODO: needs refactoring... (and maybe separation to State)
+    @staticmethod
+    def _decode_state(dct):
+        if "__StateTwoPlayersStandardRules__" in dct:
+            # WARNING: not sure I like this usage of "super", but...
+            return State._decode_state(dct)
+        else:
+            raise TypeError(dct)  # TODO: improve this
+
     @staticmethod
     def load_from_json(fpath: str) -> "StateTwoPlayersStandardRules":
-
-        # TODO: needs refactoring... (and maybe separation to State)
-        def decode_state(dct):
-            if "__StateTwoPlayersStandardRules__" in dct:
-                # print(dct)
-                state = [
-                    dct[k]
-                    for k in "hand_size, turn, stock, trump, hands, piles, scores, table".split(
-                        ", "
-                    )
-                ]
-                hand_size, turn, stock, trump, hands, piles, scores, table = state
-
-                # TODO: check PyCharm warnings
-                turn = Player.NORTH if turn == "North" else Player.SOUTH
-                stock = get_cards(stock)
-                trump = get_card(trump)
-                hands = {p: get_cards(l) for p, l in zip(Player, hands)}
-                piles = {p: [get_cards(s) for s in t] for p, t in zip(Player, piles)}
-                scores = {p: i for p, i in zip(Player, scores)}
-                table = get_cards(table)
-
-                state = stock, trump, hands, piles, scores, table
-                return StateTwoPlayersStandardRules(
-                    hand_size=hand_size, eldest=turn, state=state
-                )
-            else:
-                raise TypeError(dct)  # TODO: improve this
-
         with open(fpath) as fp:
-            return json.load(fp, object_hook=decode_state)
+            hand_size, eldest, state = json.load(fp, object_hook=StateTwoPlayersStandardRules._decode_state)
+            return StateTwoPlayersStandardRules(hand_size=hand_size, eldest=eldest, state=state)
 
     # TODO: improve typing
     def play(
@@ -220,9 +218,7 @@ class StateTwoPlayersStandardRules(State):
 
             dealt = self._deal() if self.stock else None
 
-            # TODO: all needed?
-            # winner, added_score, [eldest, youngest], [winner, loser]
-            # print("x", winner, added_score, table, dealt)
+            # winner, added_score, [eldest, youngest], [winner, loser] - TODO: all needed?
             return winner, added_score, table, dealt
 
     # TODO: test this
