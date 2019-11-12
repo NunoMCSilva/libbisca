@@ -81,6 +81,8 @@ class State(ABC):
     def load_from_json(fpath: str) -> "State":
         raise NotImplementedError
 
+    # TODO: save to json
+
     def is_endgame(self) -> bool:
         raise NotImplementedError
 
