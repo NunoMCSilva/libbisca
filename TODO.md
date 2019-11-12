@@ -1,5 +1,6 @@
 # TODO
 
+
 ## TODO
 ### ALL
 - what is the issue with relative imports? -- check
@@ -20,6 +21,7 @@
 
 ### libbisca/state
 - run_games -- need ObservedState part, check
+
 
 ## maybe TODO
 ### libbisca/card.py
@@ -43,3 +45,8 @@
 - add test: do_random_rollout
 - add test: get_state
 - add test: run_games
+
+### other
+- check mypy, pytest-mypy for better usage
+- check if hypothesis is actually useful here
+- check pyreverse (in pylint)
