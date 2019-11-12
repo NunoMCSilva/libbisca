@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # TODO: add docstrings
 
 from libbisca.agent import Agent, RandomAgent
