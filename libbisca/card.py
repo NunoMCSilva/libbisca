@@ -65,7 +65,11 @@ class Card:
     def __gt__(self, other: "Card"):
         # only gt is implemented, state doesn't need the others
         # this compares card strength ONLY, other issues are the state's responsibility (e.g. trump)
-        return self.rank.value > other.rank.value
+        # TODO: this is a fast patch to a discovered bug -- added to test, need to do a better implementation
+        return "23456QJK7A".index(self.rank.value) > "23456QJK7A".index(
+            other.rank.value
+        )
+        # return self.rank.value > other.rank.value
 
     def __repr__(self):
         # this should be in __str__ but I prefer to see this when I print a list of cards
