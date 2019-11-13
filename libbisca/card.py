@@ -102,12 +102,12 @@ class Deck(list):
         super().__init__(Card(rank, suit) for suit in Suit for rank in ranks)
 
         if shuffle:
-            self.shuffle()
+            self._shuffle()
 
         # return typing.cast(Deck, deck)  # typing hint, does nothing to code
         # WARNING: experimental <--
 
-    def shuffle(self) -> None:
+    def _shuffle(self) -> None:
         # WARNING: experimental -->
         # SystemRandom is necessary to generate all of the 40! possibilities
         SystemRandom().shuffle(self)
