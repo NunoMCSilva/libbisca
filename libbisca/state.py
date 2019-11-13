@@ -45,6 +45,9 @@ class PlayerState:
     pile: List[Hand] = field(default_factory=list)
     score: int = 0
 
+    def __repr__(self):
+        return f"PlayerState(hand={self.hand}, pile={self.pile}, score={self.score})"
+
 
 class State(ABC):
     # two players ONLY
@@ -79,12 +82,14 @@ class State(ABC):
 
     def __repr__(self):
         return (
-            f"{self.hand_size} "
-            f"{self.turn} "
-            f"{self.stock} "
-            f"{self.trump} "
-            f"{self.players} "
-            f"{self.table}"
+            f"State("
+            f"hand_size={self.hand_size}, "
+            f"turn={'North' if self.turn == Player.NORTH else 'South'}, "
+            f"trump={self.trump}, "
+            f"North={repr(self.players[Player.NORTH]).replace('PlayerState', '')}, "
+            f"South={repr(self.players[Player.SOUTH]).replace('PlayerState', '')}, "
+            f"table={self.table}, "
+            f"stock={self.stock})"
         )
 
     def do_random_move(self) -> Tuple[Card, Optional[PlayResult]]:
