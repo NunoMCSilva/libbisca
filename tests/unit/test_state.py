@@ -180,6 +180,21 @@ class TestStateStandardRules:
             assert state.play(move) == expected_result
             assert state == expected_end_state
 
+    def test__do_random_rollout__init_state__works_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+        mock = mocker.patch("random.choice")
+        mock.side_effect = lambda hand: hand[-1]
+
+        expected_state = load_state("tests/unit/fixtures/standard_rules__3cards__non_shuffled/end.json")
+        state = get_state()
+
+        # act
+        state.do_random_rollout()
+
+        # assert
+        assert state == expected_state
+
 
 class TestGetState:
     def test__3cards__returns_correctly(self):
