@@ -45,6 +45,7 @@
 - speed: self._cards_in_stock_and_hands = len(self.stock) + etc...
 - speed: self._table_played: List[Player] = []   # TODO: doesn't really seem necessary, except for speed?
 - put get_state, load_state in State?
+- put playerstate inside State?
 
 ## tests
 ### TODO
