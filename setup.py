@@ -38,5 +38,5 @@ setup(
     packages=find_packages(),
     python_requires=">=3.7",
     install_requires=[],
-    tests_require=["pytest>=5.2.2", "pytest-mock>=1.11.2"],
+    tests_require=["pytest>=5.2.2", "pytest-mock>=1.11.2"],     # TODO: check for remaining
 )
