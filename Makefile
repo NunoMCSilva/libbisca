@@ -19,7 +19,7 @@ mypy:
 
 # PyPI
 build:
-	python setup.py sdist bdist_wheel
+	$(PER) python setup.py sdist bdist_wheel
 
 upload: build
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	$(PER) twine upload --repository-url https://test.pypi.org/legacy/ dist/*
