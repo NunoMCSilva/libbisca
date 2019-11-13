@@ -5,11 +5,16 @@
 Implements the rules for Bisca.
 
 This module exports the following classes:
-    * TODO
+    * State - abstract State class (snapshot of current game state)
+    * StateStandardRules(State) - concrete subclass of State implementing a specific variant
+    * Player - enum representing all players: North, South
+    * PlayerState - dataclass containing Player data (hand, pile, score) used in State
 
 This module exports the following functions:
-    * TODO
+    * get_state - factory function, returns an initialized subclass of State
+    * load_state - loads state from json
 """
+# TODO: improve docstrings (and add missing)
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -131,6 +136,7 @@ class State(ABC):
 
 class StateStandardRules(State):
     # for now, it will only be tested for three cards
+    # TODO: recheck rules
 
     def play(self, move: Card) -> Optional[PlayResult]:
         # return winner, added_score, [eldest, youngest], [winner, loser] or None - TODO: all needed?
