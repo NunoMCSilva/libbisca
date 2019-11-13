@@ -9,9 +9,11 @@ This module exports the following classes:
 # TODO: improve docstring
 
 from abc import ABC, abstractmethod
-import random
+
+# import random
 
 from libbisca.card import Card
+from libbisca.state import State
 
 
 class Agent(ABC):
@@ -23,8 +25,9 @@ class Agent(ABC):
 
 
 class RandomAgent(Agent):
-    def get_move(self, state: "State") -> Card:  # TODO: typing "State"
-        return random.choice(state.legal_moves)
+    def get_move(self, state: State) -> Card:  # TODO: typing "State"
+        move, _ = state.do_random_move()  # random.choice(state.legal_moves)
+        return move
 
 
 """
