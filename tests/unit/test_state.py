@@ -87,14 +87,19 @@ class TestState:
         with pytest.raises(ValueError):
             state.get_winner()
 
-    @pytest.mark.parametrize("north, south, expected", [
-        (0, 120, Player.SOUTH),
-        (30, 90, Player.SOUTH),
-        (60, 60, None),
-        (90, 30, Player.NORTH),
-        (120, 0, Player.NORTH),
-    ])
-    def test__get_winner__endgame_state_with_given_scores__returns_correctly(self, north, south, expected):
+    @pytest.mark.parametrize(
+        "north, south, expected",
+        [
+            (0, 120, Player.SOUTH),
+            (30, 90, Player.SOUTH),
+            (60, 60, None),
+            (90, 30, Player.NORTH),
+            (120, 0, Player.NORTH),
+        ],
+    )
+    def test__get_winner__endgame_state_with_given_scores__returns_correctly(
+        self, north, south, expected
+    ):
         # arrange
         state = get_state()
         state.stock = []
@@ -135,7 +140,9 @@ class TestState:
 
         # assert
         assert state.is_endgame()
-        assert state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
+        assert (
+            state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
+        )
 
     # TODO: add random_rollout with know end state (control do_random_move)
 
@@ -186,7 +193,9 @@ class TestStateStandardRules:
         mock = mocker.patch("random.choice")
         mock.side_effect = lambda hand: hand[-1]
 
-        expected_state = load_state("tests/unit/fixtures/standard_rules__3cards__non_shuffled/end.json")
+        expected_state = load_state(
+            "tests/unit/fixtures/standard_rules__3cards__non_shuffled/end.json"
+        )
         state = get_state()
 
         # act

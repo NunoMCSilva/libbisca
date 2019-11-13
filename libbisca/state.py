@@ -26,7 +26,9 @@ from typing import Dict, List, Optional, Tuple
 from libbisca.card import Card, Deck, get_card, get_cards
 
 Hand = List[Card]
-PlayResult = Tuple["Player", int, Hand, Optional[Hand]]     # winner, added_score, table, dealt_cards
+PlayResult = Tuple[
+    "Player", int, Hand, Optional[Hand]
+]  # winner, added_score, table, dealt_cards
 
 
 class Player(Enum):
@@ -109,19 +111,27 @@ class State(ABC):
 
     def get_winner(self) -> Optional[Player]:
         if self.is_endgame():
-            assert self.players[Player.NORTH].score + self.players[Player.SOUTH].score == 120
+            assert (
+                self.players[Player.NORTH].score + self.players[Player.SOUTH].score
+                == 120
+            )
 
             if self.players[Player.NORTH].score > self.players[Player.SOUTH].score:
                 return Player.NORTH
             elif self.players[Player.NORTH].score < self.players[Player.SOUTH].score:
                 return Player.SOUTH
             else:
-                return None     # Draw
+                return None  # Draw
         else:
             raise ValueError("game is not in endgame")  # TODO: better exception and msg
 
     def is_endgame(self) -> bool:
-        return len(self.stock) + len(self.players[Player.NORTH].hand) + len(self.players[Player.SOUTH].hand) == 0
+        return (
+            len(self.stock)
+            + len(self.players[Player.NORTH].hand)
+            + len(self.players[Player.SOUTH].hand)
+            == 0
+        )
 
     @abstractmethod
     def play(self, move: Card) -> Optional[PlayResult]:
