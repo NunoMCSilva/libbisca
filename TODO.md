@@ -29,6 +29,7 @@
 ### Maybe TODO
 - maybe add a pprint option to deck
 - ~~does shuffle need to public?~~
+- put get_card, get_cards in Card?
 
 ## state.py
 ### TODO
@@ -43,6 +44,7 @@
 - are piles really useful? (except in the sense of history?)
 - speed: self._cards_in_stock_and_hands = len(self.stock) + etc...
 - speed: self._table_played: List[Player] = []   # TODO: doesn't really seem necessary, except for speed?
+- put get_state, load_state in State?
 
 ## tests
 ### TODO
