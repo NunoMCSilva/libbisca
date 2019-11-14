@@ -1,149 +1,136 @@
-# TODO: add docstrings
-# TODO: decide which methods/etc are better as _"private"
+# -*- coding: utf-8 -*-
+
+"""Card
+
+Implements Bisca card related classes.
+
+This module exports the following classes:
+    * Rank - enum representing all ranks supported by Bisca cards: 23456QJK7A
+    * Suit - enum representing all suits: Hearts, Diamonds, Spades, Clubs
+    * Card - Bisca Card
+    * Deck - list of Cards (subclass of list) initializing with a full deck
+
+This module exports the following functions:
+    * get_card -- helper factory function: returns Card
+    * get_cards -- helper factory function: returns List[Card]
+"""
+# TODO: improve docstrings
 
 from dataclasses import dataclass
 from enum import Enum
 from random import SystemRandom
-from typing import List
+from typing import List, Union
 
 
-# Rank =================================================================================================================
 class Rank(Enum):
-    ACE = "A"
+    # actual sort order
     TWO = "2"
     THREE = "3"
     FOUR = "4"
     FIVE = "5"
     SIX = "6"
-    SEVEN = "7"
     QUEEN = "Q"
     JACK = "J"
     KING = "K"
-
-    def __gt__(self, other: "Rank"):
-        # TODO: ok, this might be improved...
-        return self._ORDER.index(self.value) > self._ORDER.index(other.value)
-
-    @property
-    def score(self) -> int:
-        return self._SCORE.get(self.value, 0)
+    SEVEN = "7"
+    ACE = "A"
 
 
-Rank._ORDER = "23456QJK7A"
-Rank._SCORE = {"Q": 2, "J": 3, "K": 4, "7": 10, "A": 11}
-
-
-# Suit =================================================================================================================
 class Suit(Enum):
-    HEARTS = "♥"
-    DIAMONDS = "♦"
-    SPADES = "♠"
-    CLUBS = "♣"
-
-    # TODO: add Trump Suit here as method?
+    HEARTS = "H"
+    DIAMONDS = "D"
+    SPADES = "S"
+    CLUBS = "C"
 
 
-# Card =================================================================================================================
-@dataclass
+@dataclass(unsafe_hash=True)  # WARNING: for now, this is only useful for testing
 class Card:
+    # TODO: add docstrings
+
     rank: Rank
     suit: Suit
 
-    def __hash__(self):
-        return hash((self.rank, self.suit))
+    # WARNING: experimental -->
+    _SCORE = {
+        Rank.QUEEN: 2,
+        Rank.JACK: 3,
+        Rank.KING: 4,
+        Rank.SEVEN: 10,
+        Rank.ACE: 11,
+    }  # all other cards are worth 0 points
+    _RANK_STR_TO_RANK = {rank.value: rank for rank in Rank}
+    _SUIT_STR_TO_SUIT = {suit.value: suit for suit in Suit}
+    # WARNING: experimental <--
 
     def __gt__(self, other: "Card"):
-        # only gt is implemented, the others aren't really necessary
-        return False if other.is_trump() else self.rank > other.rank
+        # only gt is implemented, state doesn't need the others
+        # this compares card strength ONLY, other issues are the state's responsibility (e.g. trump)
+        # TODO: this is a fast patch to a discovered bug -- added to test, need to do a better implementation
+        return "23456QJK7A".index(self.rank.value) > "23456QJK7A".index(
+            other.rank.value
+        )
+        # return self.rank.value > other.rank.value
 
     def __repr__(self):
-        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this comment
+        # this should be in __str__ but I prefer to see this when I print a list of cards
         # "Although practicality beats purity." -- The Zen of Python
         return f"{self.rank.value}{self.suit.value}"
 
     @property
     def score(self) -> int:
-        return self.rank.score
-
-    # TODO: put outside? add (t) for trump
-    @staticmethod
-    def get_card(card_str: str) -> "Card":
-        # TODO: needs refactoring
-        # this is mostly for testing -- can use _DECK later (remember to save memory and maybe be faster)
-
-        rank, suit = card_str
-        is_trump = "(t)" in card_str
-
-        rank = {
-            "A": Rank.ACE,
-            "2": Rank.TWO,
-            "3": Rank.THREE,
-            "4": Rank.FOUR,
-            "5": Rank.FIVE,
-            "6": Rank.SIX,
-            "7": Rank.SEVEN,
-            "Q": Rank.QUEEN,
-            "J": Rank.JACK,
-            "K": Rank.KING,
-        }[rank]
-        suit = {
-            "H": Suit.HEARTS,
-            "D": Suit.DIAMONDS,
-            "S": Suit.SPADES,
-            "C": Suit.CLUBS,
-        }[suit]
-        return TrumpCard(rank, suit) if is_trump else Card(rank, suit)
-
-    @staticmethod
-    def is_trump() -> bool:
-        return False
+        return Card._SCORE.get(self.rank, 0)
 
 
-# TrumpCard ============================================================================================================
-class TrumpCard(Card):
-    # TODO: this might be better implemented in something TrumpSuit or...?
-    TRUMP_SUIT_STR = {
-        Suit.HEARTS: "♡",
-        Suit.DIAMONDS: "♢",
-        Suit.SPADES: "♤",
-        Suit.CLUBS: "♧",
-    }
-
-    def __gt__(self, other: "Card"):
-        return self.rank > other.rank if other.is_trump() else True
-
-    def __repr__(self):
-        #  This should be in __str__ but I want to print a list of cards and seen this -- TODO: improve this
-        # "Although practicality beats purity." -- The Zen of Python
-        return f"{self.rank.value}{TrumpCard.TRUMP_SUIT_STR[self.suit]}"
-
-    @staticmethod
-    def is_trump() -> bool:
-        return True
-
-
-# Deck =================================================================================================================
-class Deck:
+class Deck(list):
     def __init__(self, shuffle=True):
-        # TODO: replace by module level _DECK (memory saves) and do copy or something? [or change __deepcopy__ in Card?]
-        deck = [Card(rank, suit) for suit in Suit for rank in Rank]
+        # WARNING: experimental -->
+        # factory method?
+        # not shuffled deck is ordered by sort order not original deck order
+        # considered not an issues, since un-shuffled is only for tests
+        ranks = [
+            Rank.ACE,
+            Rank.TWO,
+            Rank.THREE,
+            Rank.FOUR,
+            Rank.FIVE,
+            Rank.SIX,
+            Rank.SEVEN,
+            Rank.QUEEN,
+            Rank.JACK,
+            Rank.KING,
+        ]  # put this order in rank? call it deck order?
+        super().__init__(Card(rank, suit) for suit in Suit for rank in ranks)
 
         if shuffle:
-            # SystemRandom is necessary to generate all of the 40! possibilities
-            SystemRandom().shuffle(deck)
+            self._shuffle()
 
-        # set trumps
-        self.deck = [
-            (TrumpCard(card.rank, card.suit) if card.suit == deck[0].suit else card)
-            for card in deck
-        ]
+        # return typing.cast(Deck, deck)  # typing hint, does nothing to code
+        # WARNING: experimental <--
 
-    def __str__(self):
-        return str(self.deck)
+    def _shuffle(self) -> None:
+        # WARNING: experimental -->
+        # SystemRandom is necessary to generate all of the 40! possibilities
+        SystemRandom().shuffle(self)
+        # possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
+        # WARNING: experimental <--
 
-    @property
-    def bottom(self) -> Card:
-        return self.deck[0]
 
-    def pop(self) -> Card:
-        return self.deck.pop()
+# TODO: put these two in Card class?
+# TODO: optimization to access "singleton" cards?
+def get_card(card: str) -> Card:
+    # TODO: might need some refactoring
+    rank_str, suit_str = card
+
+    rank = Card._RANK_STR_TO_RANK[rank_str]
+    suit = Card._SUIT_STR_TO_SUIT[suit_str]
+
+    return Card(rank, suit)
+
+
+def get_cards(cards: str) -> List[Card]:
+    # helper function, useful for testing
+    # TODO: might need some refactoring
+    # TODO: add docstrings: receives "2H" and returns [Card(2H)]
+    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
+
+    return [] if cards == "" else [get_card(s) for s in cards.split(" ")]

@@ -1,187 +1,248 @@
+# -*- coding: utf-8 -*-
+
 """Bisca State
 
-Implements the rules for a single variant.
+Implements the rules for Bisca.
 
-Exports the following classes:
-    * Player - enum representing the two players (North and South)
-    * Winner - enum representing the win conditions (North win, South win and Draw)
-    * State - a snapshot of the current game state
+This module exports the following classes:
+    * State - abstract State class (snapshot of current game state)
+    * StateStandardRules(State) - concrete subclass of State implementing a specific variant
+    * Player - enum representing all players: North, South
+    * PlayerState - dataclass containing Player data (hand, pile, score) used in State
+
+This module exports the following functions:
+    * get_state - factory function, returns an initialized subclass of State
+    * load_state - loads state from json
 """
+# TODO: improve docstrings (and add missing)
 
-from enum import IntEnum
-from typing import Optional, Tuple
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import Enum
+import json
+import random
+from typing import Dict, List, Optional, Tuple
 
-from libbisca.card import Card, Deck
+from libbisca.card import Card, Deck, get_card, get_cards
+
+Hand = List[Card]
+PlayResult = Tuple[
+    "Player", int, Hand, Optional[Hand]
+]  # winner, added_score, table, dealt_cards
 
 
-class Player(IntEnum):
+class Player(Enum):
+    # this is because in a future ui, South is the player's side
     NORTH = -1
-    SOUTH = 1  # player side on future GUI
+    SOUTH = 1
+
+    @property
+    def opponent(self) -> "Player":
+        return Player.NORTH if self == Player.SOUTH else Player.SOUTH
 
 
-class Winner(IntEnum):
-    SOUTH = Player.SOUTH
-    DRAW = 0
-    NORTH = Player.NORTH
+@dataclass
+class PlayerState:
+    hand: Hand = field(default_factory=list)
+    pile: List[Hand] = field(default_factory=list)
+    score: int = 0
+
+    def __repr__(self):
+        return f"PlayerState(hand={self.hand}, pile={self.pile}, score={self.score})"
 
 
-class State:
-    """
-    Represents a game state (snapshot)
+class State(ABC):
+    # two players ONLY
 
-    Attributes
-    ----------
-    NUM_PLAYERS : int
-        num of players
-    HAND_SIZE : int
-        num of cards in hand
-    turn : Player
-        game turn
-    stock : List[Card]
-        un-dealt stock of cards
-    trump : Card
-        game trump
-    hands : Dict[Player, Card]
-        player cards in hands
-    table : List[Card]
-        cards on the table
-    score : int
-        score from the pov of the South player: (South score - North score)
-
-    Methods
-    -------
-    do_rollout()
-        continue game with random moves until endgame (useful for Monte Carlo agents)
-    get_score(player)
-        return score of given player
-    is_endgame()
-        return True if this is a endgame/terminal state, False otherwise
-    play(move)
-        modify state by playing the given card
-    opponent
-        return player currently not in turn
-    winner
-        return winner of game on endgame state, None otherwise
-    """
-
-    NUM_PLAYERS = 2  # code will only handle 2 player for now (and maybe in the future)
-    HAND_SIZE = 3  # TODO: extend code to Bisca9 later
-
-    def __init__(self, eldest: Player = Player.SOUTH, hand_size: int = HAND_SIZE):
-        """
-        Parameters
-        ----------
-        eldest : Player
-            first player to move
-        hand_size : int
-            player hand size (3, 7 ou 9)
-        """
+    def __init__(self, hand_size: int, eldest: Player, is_load: bool = False):
+        self.hand_size = hand_size
         self.turn = eldest
 
-        self.stock = Deck()
-        self.trump = self.stock.bottom
+        # TODO: add an else?
+        if not is_load:
+            self.stock: Deck = Deck()
+            self.trump: Card = self.stock[0]
 
-        self.hands = {player: [] for player in Player}
-        # TODO: substitute (player, card) so table is accessible without revealing inner details
-        self.table = []
-        self._table_player = []
+            self.players: Dict[Player, PlayerState] = {
+                player: PlayerState() for player in Player
+            }
+            self.table: Hand = []
 
-        # this is from the POV of Player.SOUTH
-        self.score = 0
-        self._scores = {
-            player: 0 for player in Player
-        }  # TODO: ok, I need to get the score system to work better
+            # deal cards to players
+            for _ in range(self.hand_size):
+                self._deal()
 
-        # this is for a more efficient is_endgame - TODO: add len(self.stock)?
-        self._cards_in_stock_and_hands = 40
-
-        # deal initial hand
-        for _ in range(self.HAND_SIZE):
-            self._deal_cards()
-
-    # TODO: is __hash__(self): necessary?
-
-    def __str__(self):
-        # TODO: improve this (pretty print?)
+    def __eq__(self, other):
         return (
-            f"State(turn={self.turn}, stock={self.stock}, trump={self.trump}, hands={self.hands}, "
-            f"score={self.score}, self.table={self.table}, is_endgame={self.is_endgame()}, winner={self.winner}"
+            self.hand_size == other.hand_size
+            and self.turn == other.turn
+            and self.stock == other.stock
+            and self.trump == other.trump
+            and self.players == other.players
+            and self.table == other.table
         )
 
-    # TODO: add save/load to json?
+    def __repr__(self):
+        return (
+            f"State("
+            f"hand_size={self.hand_size}, "
+            f"turn={'North' if self.turn == Player.NORTH else 'South'}, "
+            f"trump={self.trump}, "
+            f"North={repr(self.players[Player.NORTH]).replace('PlayerState', '')}, "
+            f"South={repr(self.players[Player.SOUTH]).replace('PlayerState', '')}, "
+            f"table={self.table}, "
+            f"stock={self.stock})"
+        )
 
-    # TODO: add state.hand to State? (current hand property)
+    def do_random_move(self) -> Tuple[Card, Optional[PlayResult]]:
+        # helpful for agents
+        move = random.choice(self.legal_moves)
+        return move, self.play(move)
+
+    def do_random_rollout(self) -> None:
+        while not self.is_endgame():
+            self.do_random_move()
+        # no need to return anything
 
     @property
-    def opponent(self) -> Player:
-        return Player.NORTH if self.turn == Player.SOUTH else Player.SOUTH
+    def legal_moves(self) -> List[Card]:
+        # this allows player to play any card in hand, subclass if that is not so
+        return self.players[self.turn].hand
 
-    @property
-    def winner(self) -> Optional[Winner]:
+    def get_winner(self) -> Optional[Player]:
         if self.is_endgame():
-            assert sum(self._scores.values()) == 120
-            # assert self.get_score(Player.SOUTH) == 120 - self.get_score(Player.NORTH)
+            assert (
+                self.players[Player.NORTH].score + self.players[Player.SOUTH].score
+                == 120
+            )
 
-            if self.score == 0:
-                return Winner.DRAW
+            if self.players[Player.NORTH].score > self.players[Player.SOUTH].score:
+                return Player.NORTH
+            elif self.players[Player.NORTH].score < self.players[Player.SOUTH].score:
+                return Player.SOUTH
             else:
-                return Winner.SOUTH if self.score > 0 else Winner.NORTH
+                return None  # Draw
         else:
-            return None
-
-    def do_rollout(self):
-        # do random rollout
-        raise NotImplementedError  # TODO: implement this
-
-    def get_score(self, player: Player) -> int:
-        # human understandable score
-        return self._scores[player]
+            raise ValueError("game is not in endgame")  # TODO: better exception and msg
 
     def is_endgame(self) -> bool:
-        return self._cards_in_stock_and_hands == 0
+        return (
+            len(self.stock)
+            + len(self.players[Player.NORTH].hand)
+            + len(self.players[Player.SOUTH].hand)
+            == 0
+        )
 
-    def play(self, move: Card) -> Optional[Tuple[Player, int]]:
-        # TODO: recheck game rules
-        # TODO: add other variants (that one that enforces follows after self.stock is empty)
+    @abstractmethod
+    def play(self, move: Card) -> Optional[PlayResult]:
+        raise NotImplementedError
 
-        # TODO: wouldn't a better exception here would be IllegalMove?
-        self.hands[self.turn].remove(move)
-        self._cards_in_stock_and_hands -= 1
+    def _deal(self) -> Hand:
+        # return [new_winner_card, new_loser_card]
+        dealt = []
 
-        # TODO: better format other than (player, card)? or separate in self.table and self.table_player?
+        for player in (self.turn, self.turn.opponent):
+            card = self.stock.pop()
+            self.players[player].hand.append(card)
+            dealt.append(card)
+
+        return dealt
+
+
+class StateStandardRules(State):
+    # for now, it will only be tested for three cards
+    # TODO: recheck rules
+
+    def play(self, move: Card) -> Optional[PlayResult]:
+        # return winner, added_score, [eldest, youngest], [winner, loser] or None - TODO: all needed?
+
+        # basic "take from hand and put in table"
+        self.players[self.turn].hand.remove(move)
         self.table.append(move)
-        self._table_player.append(self.turn)
 
         if len(self.table) == 1:
-            # eldest
-            self.turn = self.opponent
+            # eldest played
+            self.turn = self.turn.opponent
+            return None
         else:
-            # youngest
+            # youngest played
             winner = self._get_round_winner()
-            added_score = sum(card.score for card in self.table) * winner.value
-            self._scores[winner] += sum(card.score for card in self.table)
 
-            self.score += added_score
-            self.turn = winner
+            added_score = sum(card.score for card in self.table)
+            self.players[winner].score += added_score
+
+            table = self.table
+            self.players[winner].pile.append(table)
             self.table = []
-            self._table_player = []
 
-            # if stock exists, deal cards -- TODO: put in deal cards? (ignores call if stock doesn't exist)
-            if self.stock:
-                self._deal_cards()
+            self.turn = winner
+            dealt = self._deal() if self.stock else None
 
-            return winner, added_score
+            return winner, added_score, table, dealt
 
-        return None
-
-    def _deal_cards(self) -> None:
-        for turn in (self.turn, self.opponent):
-            self.hands[turn].append(self.stock.pop())
-
+    # TODO: test this
     def _get_round_winner(self) -> Player:
-        player1, player2 = self._table_player
         card1, card2 = self.table
-        # (player1, card1), (player2, card2) = self.table
-        return (
-            player1 if card1 > card2 else player2
-        )  # TODO: place to add follow variant (diff class?)
+        youngest = self.turn
+        eldest = self.turn.opponent
+
+        # follow is not mandatory, but if youngest plays a different suit than is not trump, eldest wins
+        if card1.suit != card2.suit:
+            if card2.suit == self.trump.suit:
+                return youngest
+            return eldest
+
+        # default
+        return eldest if card1 > card2 else youngest
+
+
+def get_state(
+    variant="StandardRules", hand_size: int = 3, eldest: Player = Player.SOUTH
+) -> State:
+    if variant == "StandardRules" and hand_size == 3:
+        return StateStandardRules(hand_size=hand_size, eldest=eldest)
+    else:
+        raise NotImplementedError
+
+
+# TODO: save_state (save to json, needs _encode_state)
+
+
+def load_state(fpath: str) -> State:
+    # loads from json
+    with open(fpath) as fp:
+        return json.load(fp, object_hook=_decode_state)
+
+
+def _decode_state(dct) -> State:
+    if "__StateStandardRulesTwoPlayersThreeCards__" in dct:
+        return _decode_state_aux(dct, StateStandardRules)
+    else:
+        raise TypeError(dct)  # TODO: improve this
+
+
+def _decode_state_aux(dct, cls) -> State:
+    # TODO: might be useful with a load state?
+
+    hand_size = dct["hand_size"]
+    turn = Player.NORTH if dct["turn"] == "North" else Player.SOUTH
+
+    hands = dct["hands"]
+    piles = dct["piles"]
+    scores = dct["scores"]
+
+    state = cls(hand_size=hand_size, eldest=turn, is_load=True)
+
+    state.stock = get_cards(dct["stock"])
+    state.trump = get_card(dct["trump"])
+
+    state.players = {}
+    # TODO: check this PyCharm warning
+    for player, hand, pile, score in zip(list(Player), hands, piles, scores):
+        state.players[player] = PlayerState(
+            get_cards(hand), [get_cards(s) for s in pile], score
+        )
+
+    state.table = get_cards(dct["table"])
+
+    return state

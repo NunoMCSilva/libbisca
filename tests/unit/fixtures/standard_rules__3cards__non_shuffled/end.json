@@ -1,0 +1,14 @@
+{
+  "__StateStandardRulesTwoPlayersThreeCards__": true,
+  "hand_size": 3,
+  "turn": "South",
+  "stock": "",
+  "trump": "AH",
+  "hands": ["", ""],
+  "piles": [
+    ["2C AC", "KS JS", "2S AS", "KD JD", "2D AD", "KH JH", "2H AH", "7C QC"],
+    ["6C 5C", "4C 3C", "QS 7S", "6S 5S", "4S 3S", "QD 7D", "6D 5D", "4D 3D", "QH 7H", "6H 5H", "4H 3H", "JC KC"]
+  ],
+  "scores": [77, 43],
+  "table": ""
+}

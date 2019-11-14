@@ -1,59 +1,88 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 
 from libbisca.card import *
 
-
-# TODO: check black's change to this comments formatting... don't really like it here (too close to each other)
-# Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior]
-@pytest.mark.parametrize(
-    "card1, card2, expected",
-    [
-        # same type, same suit: compare rank ---------------------------------------------------------------------------
-        # AH > 7H
-        (Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.HEARTS), True),
-        (TrumpCard(Rank.ACE, Suit.HEARTS), TrumpCard(Rank.SEVEN, Suit.HEARTS), True),
-        # 5C < 7C
-        (Card(Rank.FIVE, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), False),
-        (TrumpCard(Rank.FIVE, Suit.CLUBS), TrumpCard(Rank.SEVEN, Suit.CLUBS), False),
-        # same type, different suits: compare rank
-        # TODO: make clear this compares considering card order and is trump, other considerations (for other variants)
-        # are the responsibility of state
-        # AC > 7H
-        (Card(Rank.ACE, Suit.CLUBS), Card(Rank.SEVEN, Suit.HEARTS), True),
-        (TrumpCard(Rank.ACE, Suit.CLUBS), TrumpCard(Rank.SEVEN, Suit.HEARTS), True),
-        # 5D < 7C
-        (Card(Rank.FIVE, Suit.DIAMONDS), Card(Rank.SEVEN, Suit.CLUBS), False),
-        (TrumpCard(Rank.FIVE, Suit.DIAMONDS), TrumpCard(Rank.SEVEN, Suit.CLUBS), False),
-        # different type -----------------------------------------------------------------------------------------------
-        # 2D(t) > 7C
-        (TrumpCard(Rank.TWO, Suit.DIAMONDS), Card(Rank.SEVEN, Suit.CLUBS), True),
-        # 3D < 2S(t)
-        (Card(Rank.THREE, Suit.DIAMONDS), TrumpCard(Rank.TWO, Suit.SPADES), False),
-    ],
-)
-def test__card_and_trump_card_gt__two_cards__return_expected(card1, card2, expected):
-    # Tests Card.__gt__ and Rank.__gt__
-
-    # act & assert
-    assert (card1 > card2) is expected
+# using Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior] unittest naming
 
 
-def test__deck_init__shuffle_false__return_expected():
-    # Tests Deck.__init__(False) and Deck.__str__, Card.__repr__, Trump.__repr__, Rank.__str__, Suit.__str__
-
-    # arrange
-    expected = (
-        "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, 4♠, 5♠,"
-        " 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣, 3♣, 4♣, 5♣, 6♣, 7♣, Q♣, J♣, K♣]"
+class TestCard:
+    @pytest.mark.parametrize(
+        "cards", ["2H < 5H", "6C > 3C", "3S < 7S", "5H > 4C", "JC > QC"]
     )
+    def test__gt__two_cards__returns_expected(self, cards):
+        # arrange
+        c1, op, c2 = cards.split(" ")
+        c1, c2 = get_cards(cards.replace(op, "").replace("  ", " "))
+        expected = op == ">"
 
-    # act
-    deck = Deck(shuffle=False)
+        # act & Assert
+        assert (c1 > c2) is expected
 
-    # assert
-    assert str(deck) == expected
+    @pytest.mark.parametrize("card_str", ["QS", "KH", "2D"])
+    def test__repr__any_card__returns_expected(self, card_str):
+        # mostly for my peace of mind
+
+        # arrange
+        card = get_card(card_str)
+
+        # act & assert
+        assert isinstance(card, Card)  # again, peace of mind
+        assert repr(card) == card_str
+
+    @pytest.mark.parametrize(
+        "card_str, score", [("7S", 10), ("QH", 2), ("2C", 0), ("5D", 0)]
+    )
+    def test__score__any_card__returns_expected(self, card_str, score):
+        # arrange
+        card = get_card(card_str)
+
+        # act & assert
+        assert card.score == score
 
 
-# TODO: consider which from the missing tests are useful to write:
-# TODO: missing tests: Card.__hash__, Card.score (also Rank.score), Card.get_card, Card.is_trump, TrumpCard.is_trump
-# TODO: missing tests: Deck.bottom, Deck.pop, Deck.__init__(True)
+class TestDeck:
+    def test__init__not_shuffled__returns_expected(self, deck):
+        # act & assert
+        assert Deck(shuffle=False) == deck
+
+    def test__init__shuffled__returns_expected(self, deck):
+        # act
+        shuffled_deck = Deck()
+
+        # act & assert
+        assert shuffled_deck != deck
+        # I'd prefer sorted but result is unpredictable (ranks correct, suit random) - no point in worrying about this
+        assert set(shuffled_deck) == set(deck)
+        assert len(set(shuffled_deck)) == len(deck)  # ok, now this is just paranoia
+
+
+class TestGetCard:
+    def test__any_card__str__returns_expected(self):
+        # arrange
+        card = Card(Rank.QUEEN, Suit.SPADES)
+        card_str = "QS"
+
+        # act & assert
+        assert get_card(card_str) == card
+
+
+class TestGetCards:
+    @pytest.mark.parametrize(
+        "card_str, cards",
+        [
+            ("", []),
+            ("QS", [Card(Rank.QUEEN, Suit.SPADES)]),
+            (
+                "QS KH 7C",
+                [
+                    Card(Rank.QUEEN, Suit.SPADES),
+                    Card(Rank.KING, Suit.HEARTS),
+                    Card(Rank.SEVEN, Suit.CLUBS),
+                ],
+            ),
+        ],
+    )
+    def test__any_card_str__returns_expected(self, card_str, cards):
+        assert get_cards(card_str) == cards

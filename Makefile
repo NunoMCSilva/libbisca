@@ -1,3 +1,4 @@
+PROJ = libbisca
 PE = pipenv
 PER = $(PE) run
 
@@ -7,18 +8,16 @@ init:
 black:
 	$(PER) black -tpy37 .
 
+
+# tests
 unit:
-	$(PER) pytest tests/unit
+	$(PER) pytest --cov=$(PROJ) --mypy tests/unit
 
-integration:
-	$(PER) pytest tests/integration
+mypy:
+	$(PER) mypy -p $(PROJ)
 
-test:
-	$(PER) pytest tests
 
-cov:
-	$(PER) pytest --cov=libbisca tests
-
+# PyPI
 build:
 	$(PER) python setup.py sdist bdist_wheel
 

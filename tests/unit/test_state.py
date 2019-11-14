@@ -1,164 +1,240 @@
-# TODO: add docstrings
+# -*- coding: utf-8 -*-
+
+from json import JSONDecodeError
 
 import pytest
 
 from libbisca.state import *
 
+# using Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior] unittest naming
 
-def test__state_init__first_eldest_is_south_player__initializes_correctly(mocker):
-    # arrange
-    expected_stock = (
-        "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-        "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣, 3♣, 4♣]"
+
+class TestState:
+    # while state is abstract, this tests concrete methods used unchanged by subclasses
+
+    def test__eq__two_equal_states__returns_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+
+        state1 = get_state()
+        state2 = get_state()
+
+        # act & assert
+        assert state1 == state2
+
+    def test__eq__two_diff_states__returns_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+
+        state1 = get_state()
+        state2 = get_state()
+        state2.players[Player.NORTH].hand.pop()
+        state2.players[Player.NORTH].score = 120
+
+        # act & assert
+        assert state1 != state2
+
+    @pytest.mark.parametrize("eldest", list(Player))  # TODO: check PyCharm warning
+    def test__init__3cards_and_eldest_player_is_given__initializes_correctly(
+        self, mocker, deck, eldest
+    ):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+
+        opponent = eldest.opponent
+
+        # act
+        state = get_state(eldest=eldest)
+
+        # assert
+        assert state.hand_size == 3
+        assert state.turn == eldest
+        assert state.stock == deck[:34]  # AH to 4C
+        assert state.trump == get_card("AH")
+
+        assert state.players[eldest].hand == get_cards("KC QC 6C")
+        assert state.players[eldest].pile == []
+        assert state.players[eldest].score == 0
+
+        assert state.players[opponent].hand == get_cards("JC 7C 5C")
+        assert state.players[opponent].pile == []
+        assert state.players[opponent].score == 0
+
+        assert state.table == []
+
+    def test__is_endgame__init_state__returns_correctly(self):
+        # arrange
+        state = get_state()
+
+        # act & assert
+        assert state.is_endgame() is False
+
+    def test__is_endgame__terminal_state__returns_correctly(self):
+        # arrange
+        state = get_state()
+        state.stock = []
+        state.players[Player.NORTH].hand = []
+        state.players[Player.SOUTH].hand = []
+
+        # act & assert
+        assert state.is_endgame() is True
+
+    def test__get_winner__init_state__raises_error(self):
+        # arrange
+        state = get_state()
+
+        # act & assert
+        with pytest.raises(ValueError):
+            state.get_winner()
+
+    @pytest.mark.parametrize(
+        "north, south, expected",
+        [
+            (0, 120, Player.SOUTH),
+            (30, 90, Player.SOUTH),
+            (60, 60, None),
+            (90, 30, Player.NORTH),
+            (120, 0, Player.NORTH),
+        ],
     )
-    mocker.patch("random.SystemRandom.shuffle")
+    def test__get_winner__endgame_state_with_given_scores__returns_correctly(
+        self, north, south, expected
+    ):
+        # arrange
+        state = get_state()
+        state.stock = []
+        state.players[Player.NORTH].hand = []
+        state.players[Player.SOUTH].hand = []
 
-    # act
-    state = State()
+        state.players[Player.NORTH].score = north
+        state.players[Player.SOUTH].score = south
 
-    # assert
-    assert str(state.stock) == expected_stock
-    assert state.turn == Player.SOUTH
-    assert repr(state.trump) == "A♡"
-    assert repr(state.hands[Player.SOUTH]) == "[K♣, Q♣, 6♣]"
-    assert repr(state.hands[Player.NORTH]) == "[J♣, 7♣, 5♣]"
-    assert state.score == 0
-    assert state.table == []
+        # act & assert
+        assert state.get_winner() == expected
+
+    def test__do_random_move__init_state__works_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+        state1 = get_state()
+        state2 = get_state()
+
+        card = get_card("KC")
+        state2.play(card)
+        mock = mocker.patch("random.choice")
+        mock.return_value = card
+
+        # act
+        results = state1.do_random_move()  # should play KC
+
+        # assert
+        assert state1 == state2
+        assert results == (card, None)
+
+    # TODO: should this one be in integration?
+    def test__do_random_rollout__init_state__works_correctly(self):
+        # arrange
+        state = get_state()
+
+        # act
+        state.do_random_rollout()
+
+        # assert
+        assert state.is_endgame()
+        assert (
+            state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
+        )
+
+    # TODO: add random_rollout with know end state (control do_random_move)
 
 
-def test__state_play__play_eldest__runs_correct(mocker):
-    # method is command method, check modifications
+class TestStateStandardRules:
 
-    # arrange
-    # TODO: add state fixture?
-    expected_stock = (
-        "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-        "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣, 3♣, 4♣]"
+    # TODO: should this be in integration?
+    # TODO: really need to this better -- this is an incorrect usage of parametrize
+    @pytest.mark.parametrize(
+        "moves, expected_results, expected_end_state_fpaths",
+        [
+            (
+                get_cards("6C 7C JC QC"),
+                [
+                    None,
+                    (Player.NORTH, 10, get_cards("6C 7C"), get_cards("4C 3C")),
+                    None,
+                    (Player.NORTH, 5, get_cards("JC QC"), get_cards("2C AC")),
+                ],
+                # TODO: really need directory path fixture
+                [
+                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/1_move.json",
+                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/2_move.json",
+                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/3_move.json",
+                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/4_move.json",
+                ],
+            )
+        ],
     )
-    mocker.patch("random.SystemRandom.shuffle")
-    state = State()
+    def test__play__after_given_moves__state_is_as_expected(
+        self, mocker, moves, expected_results, expected_end_state_fpaths
+    ):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
 
-    move = Card.get_card("KC")
+        # arrange, act & assert
+        state = get_state()
+        for move, expected_result, expected_end_state_fpath in zip(
+            moves, expected_results, expected_end_state_fpaths
+        ):
+            expected_end_state = load_state(expected_end_state_fpath)
+            assert state.play(move) == expected_result
+            assert state == expected_end_state
 
-    # act
-    result = state.play(move)
+    def test__do_random_rollout__init_state__works_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+        mock = mocker.patch("random.choice")
+        mock.side_effect = lambda hand: hand[-1]
 
-    # assert
-    assert result is None
-    assert str(state.stock) == expected_stock
-    assert state.turn == Player.NORTH
-    assert repr(state.trump) == "A♡"
-    assert repr(state.hands[Player.SOUTH]) == "[Q♣, 6♣]"
-    assert repr(state.hands[Player.NORTH]) == "[J♣, 7♣, 5♣]"
-    assert state.table == [move]
-    assert state.score == 0
+        expected_state = load_state(
+            "tests/unit/fixtures/standard_rules__3cards__non_shuffled/end.json"
+        )
+        state = get_state()
 
+        # act
+        state.do_random_rollout()
 
-def test__state_play__play_youngest__runs_correct(mocker):
-    # method is command method, check modifications
-
-    # arrange
-    expected_stock = (
-        "[A♡, 2♡, 3♡, 4♡, 5♡, 6♡, 7♡, Q♡, J♡, K♡, A♦, 2♦, 3♦, 4♦, 5♦, 6♦, 7♦, Q♦, J♦, K♦, A♠, 2♠, 3♠, "
-        "4♠, 5♠, 6♠, 7♠, Q♠, J♠, K♠, A♣, 2♣]"
-    )
-    mocker.patch("random.SystemRandom.shuffle")
-
-    state = State()
-    state.play(Card.get_card("KC"))
-
-    move = Card.get_card("7C")
-
-    # act
-    result = state.play(move)
-
-    # assert
-    assert result == (Player.NORTH, -14)
-    assert str(state.stock) == expected_stock
-    assert state.turn == Player.NORTH
-    assert repr(state.trump) == "A♡"
-    assert repr(state.hands[Player.SOUTH]) == "[Q♣, 6♣, 3♣]"
-    assert repr(state.hands[Player.NORTH]) == "[J♣, 5♣, 4♣]"
-    assert state.table == []
-    assert state.score == -14  # TODO: check if adds or replaces
+        # assert
+        assert state == expected_state
 
 
-def test__state_is_endgame__initial_state__return_false():
-    # method is query method, check output
+class TestGetState:
+    def test__3cards__returns_correctly(self):
+        # act
+        state = get_state()
 
-    # arrange
-    state = State()
-
-    # act & assert
-    assert state.is_endgame() is False
-
-
-def test__state_is_endgame__terminal_state__return_false():
-    # arrange
-    state = State()
-    state._cards_in_stock_and_hands = 0
-
-    # act & assert
-    assert state.is_endgame() is True
+        # assert
+        assert isinstance(state, StateStandardRules)
+        assert state.hand_size == 3
 
 
-def test__state_winner__initial_state__return_none():
-    # arrange
-    state = State()
+class TestLoadState:
+    def test__empty_json__raises_error(self, tmp_path):
+        # arrange
+        fpath = tmp_path / "empty.json"
+        fpath.write_text("")
 
-    # act & assert
-    assert state.winner is None
+        # act & assert -- TODO: need to do this better
+        with pytest.raises(JSONDecodeError):
+            load_state(fpath)
 
+    def test__equivalent_to_default_state__returns_correctly(self, mocker):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
 
-@pytest.mark.parametrize(
-    "score, winner",
-    [(0, Winner.DRAW), (90 - 30, Winner.SOUTH), (30 - 90, Winner.NORTH)],
-)
-def test__state_winner__final_state__x(score, winner):
-    # arrange
-    state = State()
-    state._cards_in_stock_and_hands = 0
-    state.score = score
-    state._scores[Player.SOUTH] = (score + 120) // 2
-    state._scores[Player.NORTH] = -(score - 120) // 2
+        expected_state = get_state()
+        # TODO: need "fixture directory" stuff
+        fpath = "tests/unit/fixtures/standard_rules__3cards__non_shuffled/0_init.json"
 
-    # act & assert
-    assert state.winner == winner
+        # act
+        state = load_state(fpath)
 
-
-def test__state_score_and_get_score__initial_state__return_none():
-    # arrange
-    state = State()
-
-    # act & assert
-    assert state.score == 0
-    assert state.get_score(Player.SOUTH) == 0
-    assert state.get_score(Player.NORTH) == 0
-
-
-@pytest.mark.parametrize(
-    "south_score, score",
-    [(0, 0 - 120), (30, 30 - 90), (60, 0), (90, 90 - 30), (120, 120 - 0)],
-)
-def test__state_get_score__final_state__return_human_score(south_score, score):
-    # arrange
-    state = State()
-
-    state._cards_in_stock_and_hands = 0
-    state.score = score
-    state._scores[Player.SOUTH] = south_score
-    state._scores[Player.NORTH] = 120 - south_score
-
-    # act & assert
-    assert state.get_score(Player.SOUTH) == south_score
-    assert (
-        state.get_score(Player.NORTH) == 120 - south_score
-    )  # TODO: put 120 in constant?
-
-
-# TODO: check which of this tests add value to testing
-# TODO: add test for State.__init__ with eldest=NORTH
-# TODO: add test for State.__init__ with hand_size=7 and 9
-# TODO: add test for State.play - middle of game move
-# TODO: add test for State.play - trying at endgame
-# TODO: add test for State.opponent
+        # assert
+        assert expected_state == state
