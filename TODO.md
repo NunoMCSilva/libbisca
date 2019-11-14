@@ -2,6 +2,7 @@
 
 ## All
 ### TODO
+- just put agents in biscaai, and keep libbisca only for rules, etc (and some bisaai helper functions?)
 - release code as is as 0.1.0 -- without agent
 - what is the issue with relative imports? -- check
 - check Google/realpython guidelines on documentation (and check how to generate it)
@@ -46,6 +47,10 @@
 - speed: self._table_played: List[Player] = []   # TODO: doesn't really seem necessary, except for speed?
 - put get_state, load_state in State?
 - put playerstate inside State?
+
+## README.md
+### TODO
+- alpha -- add badge with status
 
 ## tests
 ### TODO
