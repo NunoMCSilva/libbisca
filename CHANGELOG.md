@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.1] - 2019-11-13
+## [0.0.1] - 2019-11-14
 ### Added
 - Everything. Modules card and state are reasonably stable. Module agent is not working.
 
