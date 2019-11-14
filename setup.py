@@ -14,7 +14,7 @@ VERSION = get_version()
 
 
 setup(
-    name="libbisca",
+    name="libbisca1",   # TODO: change this if I ever do an upload to PyPi (and not test)
     version=VERSION,
     description="Bisca card game library",
     long_description=README,
