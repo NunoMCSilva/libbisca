@@ -9,5 +9,4 @@
 This project is a Bisca card game library.
 
 Status: Pre-Alpha (not ready for any use).
-
-By design: two-player variants ONLY -- it's to dev engines, ui
+By design: two-player variants ONLY -- it's to dev engines, ui not to cover all variants.
