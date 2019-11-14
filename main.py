@@ -13,7 +13,7 @@ def main():
     print()
 
     s.do_random_rollout()
-    print("termianl state:", s)
+    print("terminal state:", s)
     print()
 
     s = get_state()
