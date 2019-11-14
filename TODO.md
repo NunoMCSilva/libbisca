@@ -65,3 +65,4 @@ but better showing at end? hmmm
 - check mypy, pytest-mypy for better usage
 - check if hypothesis is actually useful here
 - check pyreverse (in pylint)
+- other than build and coverage, are the other badges linking to something useful -- should they?
