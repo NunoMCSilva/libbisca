@@ -3,9 +3,7 @@
 
 [![Build Status](https://www.travis-ci.org/NunoMCSilva/libbisca.svg)](https://www.travis-ci.org/NunoMCSilva/libbisca)
 [![Coverage Status](https://img.shields.io/codecov/c/github/NunoMCSilva/libbisca)](https://codecov.io/gh/NunoMCSilva/libbisca)
-
 ![Version](https://img.shields.io/github/pipenv/locked/python-version/NunoMCSilva/libbisca)
-[![Release](https://img.shields.io/github/v/release/NunoMCSilva/libbisca)](https://github.com/NunoMCSilva/libbisca/releases)
 [![PyPi](https://img.shields.io/pypi/v/libbisca)](https://test.pypi.org/project/libbisca1/)
 
 [![License](https://img.shields.io/github/license/NunoMCSilva/libbisca)](https://github.com/NunoMCSilva/libbisca/blob/master/LICENSE.md)
