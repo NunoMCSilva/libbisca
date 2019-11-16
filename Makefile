@@ -16,8 +16,8 @@ unit:
 
 # build package
 build:
-	python setup.py sdist bdist_wheel
+	$(PER) python setup.py sdist bdist_wheel
 
 # upload to test pypi
 upload: build
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	$(PER) twine upload --repository-url https://test.pypi.org/legacy/ dist/*
