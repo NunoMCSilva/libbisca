@@ -7,11 +7,11 @@ cache: pip
 before_install:
   - pip install codecov
 
-# command to install dependencies - TODO: check
+# command to install dependencies
 install:
   - make init
 
-# command to run tests - TODO: check
+# command to run tests
 script:
   - make unit
 
