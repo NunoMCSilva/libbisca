@@ -20,4 +20,4 @@ build:
 
 # upload to test pypi
 upload: build
-	$(PER) twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	$(PER) twine upload dist/*
