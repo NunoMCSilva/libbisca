@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2019-11-16
+## Changed
+- changes to setup.py, Makefile and __version__ to allow first PyPI release
+
 ## [0.1.0] - 2019-11-16
 ### Removed
 - agent module - code will be migrated to a future BiscaAI library.
@@ -18,5 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Everything. Modules card and state are reasonably stable. Module agent is not working.
 
 [Unreleased]: https://github.com/NunoMCSilva/libbisca/compare/v1.0.0...HEAD
+[0.1.0]: https://github.com/NunoMCSilva/libbisca/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/NunoMCSilva/libbisca/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NunoMCSilva/libbisca/releases/tag/v0.0.1
