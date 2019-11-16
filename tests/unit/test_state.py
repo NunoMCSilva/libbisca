@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from json import JSONDecodeError
-
 import pytest
 
 from libbisca.state import *
 
-# using Roy Osherove's [UnitOfWork_StateUnderTest_ExpectedBehavior] unittest naming
+
+class TestGetState:
+    def test__default__returns_correctly(self):
+        # act
+        state = get_state()
+
+        # assert
+        assert isinstance(state, State)
+        assert state.hand_size == 3
+        assert state.turn == Player.SOUTH
 
 
 class TestState:
-    # while state is abstract, this tests concrete methods used unchanged by subclasses
-
     def test__eq__two_equal_states__returns_correctly(self, mocker):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
@@ -39,7 +44,7 @@ class TestState:
         self, mocker, deck, eldest
     ):
         # arrange
-        mocker.patch("random.SystemRandom.shuffle")
+        mock = mocker.patch("random.SystemRandom.shuffle")
 
         opponent = eldest.opponent
 
@@ -112,6 +117,44 @@ class TestState:
         # act & assert
         assert state.get_winner() == expected
 
+    # TODO: should this be in integration?
+    # TODO: really need to this better -- this is an incorrect usage of parametrize
+    @pytest.mark.parametrize(
+        "moves, expected_results, expected_end_state_fpaths",
+        [
+            (
+                get_cards("6C 7C JC QC"),
+                [
+                    None,
+                    (Player.NORTH, 10, get_cards("6C 7C"), get_cards("4C 3C")),
+                    None,
+                    (Player.NORTH, 5, get_cards("JC QC"), get_cards("2C AC")),
+                ],
+                # TODO: really need directory path fixture
+                [
+                    "tests/unit/fixtures/default_state/1_move.json",
+                    "tests/unit/fixtures/default_state/2_move.json",
+                    "tests/unit/fixtures/default_state/3_move.json",
+                    "tests/unit/fixtures/default_state/4_move.json",
+                ],
+            )
+        ],
+    )
+    def test__play__after_given_moves__state_is_as_expected(
+        self, mocker, moves, expected_results, expected_end_state_fpaths
+    ):
+        # arrange
+        mocker.patch("random.SystemRandom.shuffle")
+
+        # arrange, act & assert
+        state = get_state()
+        for move, expected_result, expected_end_state_fpath in zip(
+            moves, expected_results, expected_end_state_fpaths
+        ):
+            expected_end_state = load_state(expected_end_state_fpath)
+            assert state.play(move) == expected_result
+            assert state == expected_end_state
+
     def test__do_random_move__init_state__works_correctly(self, mocker):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
@@ -144,58 +187,13 @@ class TestState:
             state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
         )
 
-    # TODO: add random_rollout with know end state (control do_random_move)
-
-
-class TestStateStandardRules:
-
-    # TODO: should this be in integration?
-    # TODO: really need to this better -- this is an incorrect usage of parametrize
-    @pytest.mark.parametrize(
-        "moves, expected_results, expected_end_state_fpaths",
-        [
-            (
-                get_cards("6C 7C JC QC"),
-                [
-                    None,
-                    (Player.NORTH, 10, get_cards("6C 7C"), get_cards("4C 3C")),
-                    None,
-                    (Player.NORTH, 5, get_cards("JC QC"), get_cards("2C AC")),
-                ],
-                # TODO: really need directory path fixture
-                [
-                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/1_move.json",
-                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/2_move.json",
-                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/3_move.json",
-                    "tests/unit/fixtures/standard_rules__3cards__non_shuffled/4_move.json",
-                ],
-            )
-        ],
-    )
-    def test__play__after_given_moves__state_is_as_expected(
-        self, mocker, moves, expected_results, expected_end_state_fpaths
-    ):
-        # arrange
-        mocker.patch("random.SystemRandom.shuffle")
-
-        # arrange, act & assert
-        state = get_state()
-        for move, expected_result, expected_end_state_fpath in zip(
-            moves, expected_results, expected_end_state_fpaths
-        ):
-            expected_end_state = load_state(expected_end_state_fpath)
-            assert state.play(move) == expected_result
-            assert state == expected_end_state
-
-    def test__do_random_rollout__init_state__works_correctly(self, mocker):
+    def test__do_random_rollout_with_controlled_random__init_state__works_correctly(self, mocker):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
         mock = mocker.patch("random.choice")
         mock.side_effect = lambda hand: hand[-1]
 
-        expected_state = load_state(
-            "tests/unit/fixtures/standard_rules__3cards__non_shuffled/end.json"
-        )
+        expected_state = load_state("tests/unit/fixtures/default_state/end.json")
         state = get_state()
 
         # act
@@ -205,16 +203,6 @@ class TestStateStandardRules:
         assert state == expected_state
 
 
-class TestGetState:
-    def test__3cards__returns_correctly(self):
-        # act
-        state = get_state()
-
-        # assert
-        assert isinstance(state, StateStandardRules)
-        assert state.hand_size == 3
-
-
 class TestLoadState:
     def test__empty_json__raises_error(self, tmp_path):
         # arrange
@@ -222,7 +210,7 @@ class TestLoadState:
         fpath.write_text("")
 
         # act & assert -- TODO: need to do this better
-        with pytest.raises(JSONDecodeError):
+        with pytest.raises(Exception):  # JSONDecodeError):
             load_state(fpath)
 
     def test__equivalent_to_default_state__returns_correctly(self, mocker):
@@ -231,7 +219,7 @@ class TestLoadState:
 
         expected_state = get_state()
         # TODO: need "fixture directory" stuff
-        fpath = "tests/unit/fixtures/standard_rules__3cards__non_shuffled/0_init.json"
+        fpath = "tests/unit/fixtures/default_state/0_init.json"
 
         # act
         state = load_state(fpath)
