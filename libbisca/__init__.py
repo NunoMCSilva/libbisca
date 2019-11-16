@@ -1,10 +1,20 @@
 # -*- coding: utf-8 -*-
 
-# TODO: add docstrings
+# TODO: add docstring
 
-# TODO: decide what to expose as API
-from libbisca.agent import Agent, RandomAgent
-from libbisca.card import Deck  # Card, Deck, Rank, Suit, get_card, get_cards
-from libbisca.state import get_state  # Player, State, load_state
+from libbisca.card import Card, Rank, Suit, get_card, get_cards, get_deck
+from libbisca.state import Player, PlayerState, State, get_state
 
-__version__ = "0.0.1"
+# TODO: restrict any of these?
+__all__ = [
+    "Card",
+    "Suit",
+    "get_card",
+    "get_cards",
+    "get_deck",
+    "Player",
+    "PlayerState",
+    "State",
+    "get_state",
+]
+__version__ = "0.1.0"

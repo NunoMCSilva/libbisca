@@ -187,7 +187,9 @@ class TestState:
             state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
         )
 
-    def test__do_random_rollout_with_controlled_random__init_state__works_correctly(self, mocker):
+    def test__do_random_rollout_with_controlled_random__init_state__works_correctly(
+        self, mocker
+    ):
         # arrange
         mocker.patch("random.SystemRandom.shuffle")
         mock = mocker.patch("random.choice")
