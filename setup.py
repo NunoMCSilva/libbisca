@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 
 def get_version():
-    for line in (HERE / "bisca" / "__init__.py").read_text().split("\n"):
+    for line in (HERE / "libbisca" / "__init__.py").read_text().split("\n"):
         if line.startswith("__version__"):
             return line.split('"')[1]
 
