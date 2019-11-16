@@ -14,7 +14,7 @@ VERSION = get_version()
 
 
 setup(
-    name="libbisca",
+    name="libbisca1",  # TODO: modify before upload to actual pypi
     version=VERSION,
     description="A Python bisca library",
     long_description=README,
