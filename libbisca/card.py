@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# TODO: improve docstrings
 """Card
 
 Implements Bisca card related classes.
@@ -8,129 +9,106 @@ This module exports the following classes:
     * Rank - enum representing all ranks supported by Bisca cards: 23456QJK7A
     * Suit - enum representing all suits: Hearts, Diamonds, Spades, Clubs
     * Card - Bisca Card
-    * Deck - list of Cards (subclass of list) initializing with a full deck
 
 This module exports the following functions:
-    * get_card -- helper factory function: returns Card
-    * get_cards -- helper factory function: returns List[Card]
+    * get_card -- TODO
+    * get_cards -- TODO
+    * get_deck -- returns a shuffled bisca deck
 """
-# TODO: improve docstrings
+# TODO: improve doctring
+# TODO: convert Card to Enum?
 
 from dataclasses import dataclass
 from enum import Enum
 from random import SystemRandom
-from typing import List, Union
+from typing import List
 
 
 class Rank(Enum):
-    # actual sort order
-    TWO = "2"
-    THREE = "3"
-    FOUR = "4"
-    FIVE = "5"
-    SIX = "6"
-    QUEEN = "Q"
-    JACK = "J"
-    KING = "K"
-    SEVEN = "7"
-    ACE = "A"
+    # order, repr, score
+    TWO = 0, "2", 0
+    THREE = 1, "3", 0
+    FOUR = 2, "4", 0
+    FIVE = 3, "5", 0
+    SIX = 4, "6", 0
+    QUEEN = 5, "Q", 2
+    JACK = 6, "J", 3
+    KING = 7, "K", 4
+    SEVEN = 8, "7", 10
+    ACE = 9, "A", 11
+
+    def __init__(self, order, repr_, score):
+        self.order = order
+        self.repr = repr_
+        self.score = score
+
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.order > other.order
+        return NotImplemented
+
+    def __repr__(self):
+        return f"{self.repr}"
+
+
+_STR_TO_RANK = {rank.repr: rank for rank in Rank}
 
 
 class Suit(Enum):
+
     HEARTS = "H"
     DIAMONDS = "D"
     SPADES = "S"
     CLUBS = "C"
 
+    def __repr__(self):
+        return f"{self.value}"  # TODO: add "pprint" (unicode card suits?)
 
-@dataclass(unsafe_hash=True)  # WARNING: for now, this is only useful for testing
+
+_STR_TO_SUIT = {suit.value: suit for suit in Suit}
+
+
+# TODO: optimization to access "singleton" cards in DECK or... turn this into Enum
+@dataclass(frozen=True)  # TODO: performance hit, check in profiling
 class Card:
-    # TODO: add docstrings
-
     rank: Rank
     suit: Suit
 
-    # WARNING: experimental -->
-    _SCORE = {
-        Rank.QUEEN: 2,
-        Rank.JACK: 3,
-        Rank.KING: 4,
-        Rank.SEVEN: 10,
-        Rank.ACE: 11,
-    }  # all other cards are worth 0 points
-    _RANK_STR_TO_RANK = {rank.value: rank for rank in Rank}
-    _SUIT_STR_TO_SUIT = {suit.value: suit for suit in Suit}
-    # WARNING: experimental <--
-
-    def __gt__(self, other: "Card"):
-        # only gt is implemented, state doesn't need the others
-        # this compares card strength ONLY, other issues are the state's responsibility (e.g. trump)
-        # TODO: this is a fast patch to a discovered bug -- added to test, need to do a better implementation
-        return "23456QJK7A".index(self.rank.value) > "23456QJK7A".index(
-            other.rank.value
-        )
-        # return self.rank.value > other.rank.value
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.rank > other.rank
+        return NotImplemented
 
     def __repr__(self):
-        # this should be in __str__ but I prefer to see this when I print a list of cards
         # "Although practicality beats purity." -- The Zen of Python
-        return f"{self.rank.value}{self.suit.value}"
+        return f"{self.rank!r}{self.suit!r}"
 
     @property
     def score(self) -> int:
-        return Card._SCORE.get(self.rank, 0)
+        return self.rank.score
 
 
-class Deck(list):
-    def __init__(self, shuffle=True):
-        # WARNING: experimental -->
-        # factory method?
-        # not shuffled deck is ordered by sort order not original deck order
-        # considered not an issues, since un-shuffled is only for tests
-        ranks = [
-            Rank.ACE,
-            Rank.TWO,
-            Rank.THREE,
-            Rank.FOUR,
-            Rank.FIVE,
-            Rank.SIX,
-            Rank.SEVEN,
-            Rank.QUEEN,
-            Rank.JACK,
-            Rank.KING,
-        ]  # put this order in rank? call it deck order?
-        super().__init__(Card(rank, suit) for suit in Suit for rank in ranks)
+Cards = List[Card]
 
-        if shuffle:
-            self._shuffle()
 
-        # return typing.cast(Deck, deck)  # typing hint, does nothing to code
-        # WARNING: experimental <--
+def get_deck(shuffle: bool = True) -> Cards:
+    # TODO: needs to be like this for the mock.patch to work in tests - think about it later (it's slower)
+    deck = [Card(_STR_TO_RANK[r], s) for s in Suit for r in "A234567QJK"]
 
-    def _shuffle(self) -> None:
-        # WARNING: experimental -->
+    if shuffle:
         # SystemRandom is necessary to generate all of the 40! possibilities
-        SystemRandom().shuffle(self)
-        # possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
-        # WARNING: experimental <--
+        # TODO: possible alternative with less issues, need to research deck = random.sample(deck, len(deck))
+        SystemRandom().shuffle(deck)
+
+    return deck
 
 
-# TODO: put these two in Card class?
-# TODO: optimization to access "singleton" cards?
 def get_card(card: str) -> Card:
-    # TODO: might need some refactoring
-    rank_str, suit_str = card
-
-    rank = Card._RANK_STR_TO_RANK[rank_str]
-    suit = Card._SUIT_STR_TO_SUIT[suit_str]
-
-    return Card(rank, suit)
-
-
-def get_cards(cards: str) -> List[Card]:
     # helper function, useful for testing
-    # TODO: might need some refactoring
-    # TODO: add docstrings: receives "2H" and returns [Card(2H)]
-    # TODO: add docstrings: receives "2H 7C" and returns [Card(2H), Card(7C)
+    rank, suit = card
+    return Card(_STR_TO_RANK[rank], _STR_TO_SUIT[suit])
 
-    return [] if cards == "" else [get_card(s) for s in cards.split(" ")]
+
+def get_cards(cards: str) -> Cards:
+    # helper function, useful for testing
+    return [get_card(c) for c in cards.split(" ") if c != ""]
