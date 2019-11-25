@@ -43,7 +43,7 @@ def main():
     print(legal_moves)
     print(card in legal_moves)
 
-    print(state.is_endgame())
+    # print(state.is_endgame())
 
     # ValueError: game is not in endgame
     # print(state.get_winner())
@@ -61,7 +61,7 @@ def main():
     state = libbisca.get_state()
     print(state)
 
-    while not state.is_endgame():
+    while state.legal_moves:    # not state.is_endgame():
         results = state.play(state.legal_moves[0])
         # move, results = state.do_random_move()
         print(results)
@@ -70,7 +70,7 @@ def main():
     print()
 
     print(state.legal_moves)
-    print(state.is_endgame())
+    # print(state.is_endgame())
     print(state.get_winner())
     print()
 
