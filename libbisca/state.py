@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 import json
 import random
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, cast
 
 # TODO: check issues with relative imports
 from libbisca.card import Card, Cards, get_card, get_cards, get_deck
@@ -59,7 +59,7 @@ class State:
     hand_size: int
     turn: Player
     stock: Cards = field(default_factory=get_deck)
-    trump: Card = None  # TODO: mypy error here, how to tell it to ignore it
+    trump: Card = cast(Card, None)
     players: Dict[Player, PlayerState] = field(default_factory=_get_players_states)
     table: Cards = field(default_factory=list)
 
