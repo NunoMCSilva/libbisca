@@ -14,6 +14,10 @@ black:
 unit:
 	$(PER) pytest --cov=$(PROJ) --mypy tests/unit
 
+# run mypy checks only
+mypy:
+	$(PER) pytest --mypy -m mypy tests/
+
 # build package
 build:
 	$(PER) python setup.py sdist bdist_wheel
