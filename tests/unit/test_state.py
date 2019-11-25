@@ -67,14 +67,16 @@ class TestState:
 
         assert state.table == []
 
-    def test__is_endgame__init_state__returns_correctly(self):
+    def test__is_endgame__init_state__returns_correctly(self):  # TODO: rename function
         # arrange
         state = get_state()
 
         # act & assert
-        assert state.is_endgame() is False
+        assert bool(state.legal_moves) is True  # state.is_endgame() is False
 
-    def test__is_endgame__terminal_state__returns_correctly(self):
+    def test__is_endgame__terminal_state__returns_correctly(
+        self
+    ):  # TODO: rename function
         # arrange
         state = get_state()
         state.stock = []
@@ -82,7 +84,7 @@ class TestState:
         state.players[Player.SOUTH].hand = []
 
         # act & assert
-        assert state.is_endgame() is True
+        assert bool(state.legal_moves) is False  # state.is_endgame() is True
 
     def test__get_winner__init_state__raises_error(self):
         # arrange
@@ -182,7 +184,7 @@ class TestState:
         state.do_random_rollout()
 
         # assert
-        assert state.is_endgame()
+        assert not state.legal_moves  # assert state.is_endgame()
         assert (
             state.players[Player.NORTH].score + state.players[Player.SOUTH].score == 120
         )

@@ -78,7 +78,9 @@ class State:
         return self.players[self.turn].hand
 
     def get_winner(self) -> Optional[Player]:
-        if self.is_endgame():
+        if self.legal_moves:  # is_endgame():
+            raise ValueError("game is not in endgame")  # TODO: better exception and msg
+        else:
             assert (
                 self.players[Player.NORTH].score + self.players[Player.SOUTH].score
                 == 120
@@ -90,9 +92,10 @@ class State:
                 return Player.SOUTH
             else:
                 return None  # Draw
-        else:
-            raise ValueError("game is not in endgame")  # TODO: better exception and msg
+        # else:
+        # raise ValueError("game is not in endgame")  # TODO: better exception and msg
 
+    """
     def is_endgame(self) -> bool:
         return (
             len(self.stock)
@@ -100,6 +103,7 @@ class State:
             + len(self.players[Player.SOUTH].hand)
             == 0
         )
+    """
 
     def play(self, move: Card) -> Optional[PlayResult]:
         # return None or (winner, added_score, table [eldest, youngest], dealt_cards [winner, loser]) - TODO: all needed?
@@ -134,7 +138,7 @@ class State:
         return move, self.play(move)
 
     def do_random_rollout(self) -> None:
-        while not self.is_endgame():
+        while self.legal_moves:  # not self.is_endgame():
             self.do_random_move()
         # no need to return anything?
 
