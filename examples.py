@@ -61,7 +61,7 @@ def main():
     state = libbisca.get_state()
     print(state)
 
-    while state.legal_moves:    # not state.is_endgame():
+    while state.legal_moves:  # not state.is_endgame():
         results = state.play(state.legal_moves[0])
         # move, results = state.do_random_move()
         print(results)
