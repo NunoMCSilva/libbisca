@@ -18,10 +18,6 @@ unit:
 mypy:
 	$(PER) pytest --mypy -m mypy tests/
 
-# run tox
-tox:
-	$(PER) tox
-
 # build package
 build:
 	$(PER) python setup.py sdist bdist_wheel
