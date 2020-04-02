@@ -22,6 +22,6 @@ mypy:
 build:
 	$(PER) python setup.py sdist bdist_wheel
 
-# upload to test pypi
+# upload to pypi
 upload: build
 	$(PER) twine upload dist/*
